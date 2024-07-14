@@ -1,0 +1,24 @@
+# Pycharm
+__pycache__/
+*.pyc
+BERT.egg-info
+.idea
+vcs.xml
+
+# Model
+store_model
+wandb
+
+# API
+api.yaml
+
+# Jupyter Notebbok
+.ipynb_checkpoints
+
+# Data
+*.parquet.brotli
+*.csv
+*.json
+*.pkl
+*.txt
+*.pth

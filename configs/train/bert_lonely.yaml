@@ -1,0 +1,60 @@
+# Output
+output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train'
+
+# Data
+train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
+val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-val.csv'
+test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-test.csv'
+
+#train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
+#val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
+#test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
+
+# Device
+train_device: 'cuda:0'
+eval_device: 'cuda:1'
+
+# Type
+type: 'bert'
+bert_model: 'bert-base-uncased'
+
+# Alpha
+alpha: 0.7
+margin: 1.0
+gamma: 2
+
+# Train
+batch_size: 8
+max_epoch: 1000
+early_stop: 10
+
+# Pretrain BERT
+#pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_base_uncased.pth'
+pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_finetune/bert_lonely_finetune.pth'
+
+# Eval checkpoint
+#eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/best_checkpoint.pth'
+eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/checkpoint_04.pth'
+
+# Checkpoint
+checkpoint: None
+
+# Prompt
+prompt: 'This narrative is '
+
+# Bert Config
+bert_config: 'C:/Winston/MentalHealthResearch/mentalhealth/configs/model/bert_base.json'
+
+# Optimizer
+##Cosine
+#init_lr: 0.01
+#weight_decay: 0.05
+#min_lr: 0
+
+##Warmup
+weight_decay: 0.02
+init_lr: 0.0001
+min_lr: 0.000001
+warmup_lr: 0.000001
+lr_decay_rate: 0.9
+warmup_steps: 30
