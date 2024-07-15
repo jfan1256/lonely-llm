@@ -18,10 +18,22 @@ eval_device: 'cuda:1'
 type: 'bert'
 bert_model: 'bert-base-uncased'
 
-# Alpha
-alpha: 0.7
-margin: 1.0
-gamma: 2
+# Alpha for loss allocation
+alpha: 0.7 # Ratio of loss_lonely to loss_sentiment (i.e., 0.7 * loss_lonely + (1 - 0.7) * loss_sentiment)
+
+# Focal Loss
+alpha_focal: 0.7 # Higher value penalizes positive over negative more
+gamma_focal: 2 # Higher value penalizes indifferent probabilities
+
+# Tversky Loss
+alpha_tverksy: 0.3 # Higher value penalizes False Negatives (identifying a person as not lonely when they actually are)
+beta_tversky: 0.7 # Higher value penalizes False Positives (identifying a person as lonely when they actually are not)
+
+# Constrastive Loss
+margin: 1.0 # Distance between positive and negative embeddings
+
+# Number of attention heads for classifier
+num_head_classifier: 8
 
 # Train
 batch_size: 8
@@ -29,18 +41,18 @@ max_epoch: 1000
 early_stop: 10
 
 # Pretrain BERT
-#pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_base_uncased.pth'
-pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_finetune/bert_lonely_finetune.pth'
+pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_base_uncased.pth'
+#pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_finetune/bert_lonely_finetune.pth'
 
 # Eval checkpoint
-#eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/best_checkpoint.pth'
-eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/checkpoint_04.pth'
+eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/best_checkpoint.pth'
+#eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/checkpoint_28.pth'
 
 # Checkpoint
 checkpoint: None
 
 # Prompt
-prompt: 'This narrative is '
+prompt: ''
 
 # Bert Config
 bert_config: 'C:/Winston/MentalHealthResearch/mentalhealth/configs/model/bert_base.json'

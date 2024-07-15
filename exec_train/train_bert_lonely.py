@@ -26,8 +26,10 @@ from class_models.metrics import MetricLogger, SmoothedValue, cosine_lr_schedule
 # Training Loop
 def train(epoch, model, dataloader, optimizer, configs):
     # Loss collector
-    binary_loss_collector = []
+    lonely_loss_collector = []
     sentiment_loss_collector = []
+    dice_loss_collector = []
+    tversky_loss_collector = []
     constrat_loss_collector = []
     reason_loss_collector = []
 
@@ -37,8 +39,10 @@ def train(epoch, model, dataloader, optimizer, configs):
     # Metric Loggers
     metric_logger = MetricLogger(delimiter="  ")
     metric_logger.add_meter('loss_total', SmoothedValue(window_size=50, fmt='{value:.6f}'))
-    metric_logger.add_meter('loss_binary', SmoothedValue(window_size=50, fmt='{value:.6f}'))
+    metric_logger.add_meter('loss_lonely', SmoothedValue(window_size=50, fmt='{value:.6f}'))
     metric_logger.add_meter('loss_sentiment', SmoothedValue(window_size=50, fmt='{value:.6f}'))
+    metric_logger.add_meter('loss_dice', SmoothedValue(window_size=50, fmt='{value:.6f}'))
+    metric_logger.add_meter('loss_tversky', SmoothedValue(window_size=50, fmt='{value:.6f}'))
     metric_logger.add_meter('loss_constrast', SmoothedValue(window_size=50, fmt='{value:.6f}'))
     metric_logger.add_meter('loss_reason', SmoothedValue(window_size=50, fmt='{value:.6f}'))
     metric_logger.add_meter('lr', SmoothedValue(window_size=50, fmt='{value:.8f}'))
@@ -64,12 +68,14 @@ def train(epoch, model, dataloader, optimizer, configs):
         optimizer.zero_grad()
 
         # Train model and calculate loss
-        loss_binary, loss_sentiment, loss_constrast, loss_reason, prob = model(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=configs['train_device'])
-        binary_loss_collector.append(loss_binary.item())
+        loss_lonely, loss_sentiment, loss_dice, loss_tversky, loss_constrast, loss_reason, prob = model(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=configs['train_device'])
+        lonely_loss_collector.append(loss_lonely.item())
         sentiment_loss_collector.append(loss_sentiment.item())
+        dice_loss_collector.append(loss_dice.item())
+        tversky_loss_collector.append(loss_tversky.item())
         constrat_loss_collector.append(loss_constrast.item())
         reason_loss_collector.append(loss_reason.item())
-        loss = configs['alpha'] * loss_binary + (1 - configs['alpha']) * loss_sentiment + loss_constrast + loss_reason
+        loss = configs['alpha'] * loss_lonely + (1 - configs['alpha']) * loss_sentiment + loss_dice + loss_tversky + loss_constrast + loss_reason
 
         # Backpropagation
         loss.backward()
@@ -77,8 +83,10 @@ def train(epoch, model, dataloader, optimizer, configs):
 
         # Update metric loggers
         metric_logger.update(loss_total=loss.item())
-        metric_logger.update(loss_binary=loss_binary.item())
+        metric_logger.update(loss_lonely=loss_lonely.item())
         metric_logger.update(loss_sentiment=loss_sentiment.item())
+        metric_logger.update(loss_dice=loss_dice.item())
+        metric_logger.update(loss_tversky=loss_tversky.item())
         metric_logger.update(loss_constrast=loss_constrast.item())
         metric_logger.update(loss_reason=loss_reason.item())
         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
@@ -86,13 +94,15 @@ def train(epoch, model, dataloader, optimizer, configs):
     # Gather the stats from all processes
     metric_logger.synchronize_between_processes()
     print("Averaged stats:", metric_logger.global_avg())
-    return {k: "{:.3f}".format(meter.global_avg) for k, meter in metric_logger.meters.items()}, binary_loss_collector, sentiment_loss_collector, constrat_loss_collector, reason_loss_collector
+    return {k: "{:.3f}".format(meter.global_avg) for k, meter in metric_logger.meters.items()}, lonely_loss_collector, sentiment_loss_collector, dice_loss_collector, tversky_loss_collector, constrat_loss_collector, reason_loss_collector
 
 # Evaluation loop
 def eval(model, dataloader, configs):
     model.eval()
-    binary_loss_collector = []
+    lonely_loss_collector = []
     sentiment_loss_collector = []
+    dice_loss_collector = []
+    tversky_loss_collector = []
     constrast_loss_collector = []
     reason_loss_collector = []
 
@@ -107,18 +117,22 @@ def eval(model, dataloader, configs):
             sentiment = torch.tensor(sentiment, dtype=torch.float).to(configs['train_device'])
 
             # Evaluate model and calculate loss
-            loss_binary, loss_sentiment, loss_constrast, loss_reason, prob = model(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=configs['train_device'])
-            binary_loss_collector.append(loss_binary.item())
+            loss_lonely, loss_sentiment, loss_dice, loss_tversky, loss_constrast, loss_reason, prob = model(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=configs['train_device'])
+            lonely_loss_collector.append(loss_lonely.item())
             sentiment_loss_collector.append(loss_sentiment.item())
+            dice_loss_collector.append(loss_dice.item())
+            tversky_loss_collector.append(loss_tversky.item())
             constrast_loss_collector.append(loss_constrast.item())
             reason_loss_collector.append(loss_reason.item())
 
     # Average validation loss across dataloader
-    binary_loss = np.mean(binary_loss_collector)
+    lonely_loss = np.mean(lonely_loss_collector)
     sentiment_loss = np.mean(sentiment_loss_collector)
+    dice_loss = np.mean(dice_loss_collector)
+    tversky_loss = np.mean(tversky_loss_collector)
     constrast_loss = np.mean(constrast_loss_collector)
     reason_loss = np.mean(reason_loss_collector)
-    return binary_loss, sentiment_loss, constrast_loss, reason_loss
+    return lonely_loss, sentiment_loss, dice_loss, tversky_loss, constrast_loss, reason_loss
 
 # Main
 def main(configs):
@@ -150,8 +164,10 @@ def main(configs):
     epochs_without_improvement = 0
 
     # Loss collectors
-    binary_loss_train_collect, binary_loss_val_collect = [[]], [[]]
+    lonely_loss_train_collect, lonely_loss_val_collect = [[]], [[]]
     sentiment_loss_train_collect, sentiment_loss_val_collect = [[]], [[]]
+    dice_loss_train_collect, dice_loss_val_collect = [[]], [[]]
+    tversky_loss_train_collect, tversky_loss_val_collect = [[]], [[]]
     constrast_loss_train_collect, constrast_loss_val_collect = [[]], [[]]
     reason_loss_train_collect, reason_loss_val_collect = [[]], [[]]
 
@@ -167,19 +183,23 @@ def main(configs):
         step_lr_schedule(optimizer, epoch - 1, configs['init_lr'], configs['min_lr'], configs['lr_decay_rate'])
 
         # Train model
-        train_stats, binary_loss_train_collector, sentiment_loss_train_collector, constrast_loss_train_collector, reason_loss_train_collector = train(epoch=epoch, model=model, dataloader=train_dataloader, optimizer=optimizer, configs=configs)
-        binary_loss_train_collect[0].extend(binary_loss_train_collector)
+        train_stats, lonely_loss_train_collector, sentiment_loss_train_collector, dice_loss_train_collector, tversky_loss_train_collector, constrast_loss_train_collector, reason_loss_train_collector = train(epoch=epoch, model=model, dataloader=train_dataloader, optimizer=optimizer, configs=configs)
+        lonely_loss_train_collect[0].extend(lonely_loss_train_collector)
         sentiment_loss_train_collect[0].extend(sentiment_loss_train_collector)
+        dice_loss_train_collect[0].extend(dice_loss_train_collector)
+        tversky_loss_train_collect[0].extend(tversky_loss_train_collector)
         constrast_loss_train_collect[0].extend(constrast_loss_train_collector)
         reason_loss_train_collect[0].extend(reason_loss_train_collector)
 
         # Evaluate model
-        binary_loss_val, sentiment_loss_val, constrast_loss_val, reason_loss_val = eval(model=model, dataloader=val_dataloader, configs=configs)
-        eval_loss = configs['alpha'] * binary_loss_val + (1 - configs['alpha']) * sentiment_loss_val + constrast_loss_val + reason_loss_val
-        print(f"loss_eval: {eval_loss:.4f}  loss_binary: {binary_loss_val:.4f}  loss_sentiment: {sentiment_loss_val:.4f}  loss_constrast: {constrast_loss_val:.4f}  loss_reason: {reason_loss_val:.4f}")
+        lonely_loss_val, sentiment_loss_val, dice_loss_val, tversky_loss_val, constrast_loss_val, reason_loss_val = eval(model=model, dataloader=val_dataloader, configs=configs)
+        eval_loss = configs['alpha'] * lonely_loss_val + (1 - configs['alpha']) * sentiment_loss_val + dice_loss_val + tversky_loss_val+ constrast_loss_val + reason_loss_val
+        print(f"loss_eval: {eval_loss:.4f}  loss_lonely: {lonely_loss_val:.4f}  loss_sentiment: {sentiment_loss_val:.4f}  loss_dice: {dice_loss_val:.4f}  loss_tversky: {tversky_loss_val:.4f}  loss_constrast: {constrast_loss_val:.4f}  loss_reason: {reason_loss_val:.4f}")
 
-        binary_loss_val_collect[0].append(binary_loss_val)
+        lonely_loss_val_collect[0].append(lonely_loss_val)
         sentiment_loss_val_collect[0].append(sentiment_loss_val)
+        dice_loss_val_collect[0].append(dice_loss_val)
+        tversky_loss_val_collect[0].append(tversky_loss_val)
         constrast_loss_val_collect[0].append(constrast_loss_val)
         reason_loss_val_collect[0].append(reason_loss_val)
 
@@ -201,7 +221,7 @@ def main(configs):
         # Save model and log results
         save_obj = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'config': configs, 'epoch': epoch}
         torch.save(save_obj, os.path.join(configs['output_dir'], 'checkpoint_%02d.pth' % epoch))
-        log_stats = {**{f'train_{k}': v for k, v in train_stats.items()}, 'epoch': epoch, 'eval_loss': eval_loss}
+        log_stats = {**{f'train_{k}': v for k, v in train_stats.items()}, 'epoch': epoch, 'val_loss_total': round(eval_loss, 3), 'val_lonely_loss': round(lonely_loss_val, 3), 'val_sentiment_loss': round(sentiment_loss_val, 3), 'val_dice_loss': round(dice_loss_val, 3), 'val_tversky_loss': round(tversky_loss_val, 3), 'val_constrast_loss': round(constrast_loss_val, 3), 'val_reason_loss': round(reason_loss_val, 3)}
         with open(os.path.join(configs['output_dir'], "log.txt"), "a") as f:
             f.write(json.dumps(log_stats) + "\n")
 
@@ -209,7 +229,7 @@ def main(configs):
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     print('Training time {}'.format(total_time_str))
-    return binary_loss_train_collect, binary_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect
+    return lonely_loss_train_collect, lonely_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, dice_loss_train_collect, dice_loss_val_collect, tversky_loss_train_collect, tversky_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect
 
 if __name__ == '__main__':
     # Set seed
@@ -223,7 +243,7 @@ if __name__ == '__main__':
     yaml.dump(configs, open(os.path.join(configs['output_dir'], 'configs.yaml'), 'w'))
 
     # Execute main
-    binary_loss_train_collect, binary_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect = main(configs)
+    lonely_loss_train_collect, lonely_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, dice_loss_train_collect, dice_loss_val_collect, tversky_loss_train_collect, tversky_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect = main(configs)
 
     # Plot curves
-    plot_diagnostics(binary_loss_train_collect, binary_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect)
+    plot_diagnostics(lonely_loss_train_collect, lonely_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, dice_loss_train_collect, dice_loss_val_collect, tversky_loss_train_collect, tversky_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect)

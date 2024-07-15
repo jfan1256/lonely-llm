@@ -5,7 +5,7 @@ from torch import nn
 from transformers import BertTokenizer
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-from class_models.loss import focal_loss
+from class_models.loss import focal_loss, tversky_loss, dice_loss
 from class_models.bert import BertConfig, BertModel, BertLMHeadModel
 from class_models.utils import load_checkpoint, tie_encoder_decoder_weights, set_trainable
 
@@ -58,11 +58,18 @@ class BertLonely(nn.Module):
             print(f"{name:60} Trainable: {param.requires_grad}")
 
         # BiLSTM layer
-        self.bilstm = nn.LSTM(768, 64, num_layers=num_layers, batch_first=True, dropout=(0 if num_layers == 1 else dropout_rate), bidirectional=True)
-        self.dropout1 = nn.Dropout(dropout_rate)
+        self.bilstm = nn.LSTM(768, 64, num_layers=1, batch_first=True, bidirectional=True)
+
+        # Multi-head Attention Layer
+        self.multihead_attention = nn.MultiheadAttention(embed_dim=64*2, num_heads=self.configs['num_head_classifier'], batch_first=True)
         self.attention_layer = nn.Linear(64*2, 1)
-        self.connect_layer = nn.Linear(64*2, 32)
+
+        # Dropout
+        self.dropout1 = nn.Dropout(dropout_rate)
         self.dropout2 = nn.Dropout(dropout_rate)
+
+        # Classifier
+        self.connect_layer = nn.Linear(64*2, 32)
         self.classifier_lonely = nn.Linear(32, 1)
         self.classifier_sentiment = nn.Linear(32, 1)
 
@@ -83,27 +90,41 @@ class BertLonely(nn.Module):
         text_feat = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True, mode='text')
 
         # ===============================================Binary Classification Loss (via entire BiLSTM + Attention sequence)===============================================
+        # Feed in BiLSTM
         text_embed = text_feat.last_hidden_state
         output, _ = self.bilstm(text_embed)
         output = self.dropout1(output)
 
-        # ******************Binary Loss***********************
+        # Apply Multi-head Attention
+        output, _ = self.multihead_attention(output, output, output)
+        output = self.dropout2(output)
         attention_weights = torch.softmax(self.attention_layer(output), dim=1)
         attended_output = torch.sum(attention_weights * output, dim=1)
+
+        # Connection layer
         connected_output = self.connect_layer(attended_output)
+
+        # Get lonely and sentiment logits
         logits_lonely = self.classifier_lonely(connected_output).squeeze(-1)
         logits_sentiment = self.classifier_sentiment(connected_output).squeeze(-1)
-        loss_binary = focal_loss(logits_lonely, label, alpha=self.configs['alpha'], gamma=self.configs['gamma'])
-        loss_sentiment = focal_loss(logits_sentiment, sentiment, alpha=1-self.configs['alpha'], gamma=self.configs['gamma'])
         prob = torch.sigmoid(logits_lonely)
+
+        # ******************Focal Loss***********************
+        loss_lonely = focal_loss(logits_lonely, label, alpha=self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
+        loss_sentiment = focal_loss(logits_sentiment, sentiment, alpha=1-self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
+
+        # ******************Focal Loss***********************
+        loss_dice = dice_loss(logits_lonely, label)
+
+        # ******************Tversky Loss***********************
+        loss_tversky = tversky_loss(logits_lonely, label, alpha=self.configs['alpha_tverksy'], beta=self.configs['beta_tversky'])
 
         # ******************Constrastive Loss***********************
         embeddings_norm = F.normalize(attended_output, p=2, dim=1)
         cos_sim = torch.mm(embeddings_norm, embeddings_norm.t())
         match_loss = 0.5 * label * (1 - cos_sim) ** 2
         non_match_loss = 0.5 * (1 - label) * F.relu(self.configs['margin'] - (1 - cos_sim)) ** 2
-        loss_constrast = match_loss + non_match_loss
-        loss_constrast = loss_constrast.mean()
+        loss_constrast = torch.mean(match_loss + non_match_loss)
 
         # ******************Reason Loss***********************
         # Add prompt to reason
@@ -126,7 +147,10 @@ class BertLonely(nn.Module):
                                     labels=decoder_targets,
                                     return_dict=True)
         loss_reason = outputs.loss
-        return loss_binary, loss_sentiment, loss_constrast, loss_reason, prob
+
+        loss_lonely = torch.zeros(1, device=device)
+        loss_sentiment = torch.zeros(1, device=device)
+        return loss_lonely, loss_sentiment, loss_dice, loss_tversky, loss_constrast, loss_reason, prob
 
     # Classify
     def classify(self, prompt, device):

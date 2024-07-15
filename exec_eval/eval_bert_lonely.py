@@ -36,8 +36,10 @@ if __name__ == '__main__':
     # Evaluate
     print_header("Predict")
     label_collect = []
-    binary_loss = []
+    lonely_loss = []
     sentiment_loss = []
+    dice_loss = []
+    tversky_loss = []
     constrast_loss = []
     reason_loss = []
     reason_collect = []
@@ -49,12 +51,14 @@ if __name__ == '__main__':
             sentiment = bert_lonely.get_sentiment(prompt)
             sentiment = torch.tensor(sentiment, dtype=torch.float).to(configs['eval_device'])
 
-            loss_binary, loss_sentiment, loss_constrast, loss_reason, labels = bert_lonely(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=configs['eval_device'], classify=True)
+            loss_binary, loss_sentiment, loss_dice, loss_tversky, loss_constrast, loss_reason, labels = bert_lonely(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=configs['eval_device'])
             labels = labels.detach().cpu().numpy().tolist()
             # labels = [item[0] for item in labels]
             label_collect.extend(labels)
-            binary_loss.append(loss_binary.item())
+            lonely_loss.append(loss_binary.item())
             sentiment_loss.append(loss_sentiment.item())
+            dice_loss.append(loss_dice.item())
+            tversky_loss.append(loss_tversky.item())
             constrast_loss.append(loss_constrast.item())
             reason_loss.append(loss_reason.item())
 
@@ -75,8 +79,10 @@ if __name__ == '__main__':
     f1 = f1_score(eval['true_label'], eval['pred_label'], average='binary')
     precision = precision_score(eval['true_label'], eval['pred_label'], average='binary')
     recall = recall_score(eval['true_label'], eval['pred_label'], average='binary')
-    print("Loss Binary:", np.mean(binary_loss))
+    print("Loss Lonely:", np.mean(lonely_loss))
     print("Loss Sentiment:", np.mean(sentiment_loss))
+    print("Loss Dice:", np.mean(dice_loss))
+    print("Loss Tversky:", np.mean(tversky_loss))
     print("Loss Constrastive:", np.mean(constrast_loss))
     print("Loss Reason:", np.mean(reason_loss))
     print("Precision:", precision)
