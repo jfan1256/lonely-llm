@@ -1,5 +1,5 @@
 # Output
-output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train'
+output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_bilstm_384'
 
 # Data
 train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
@@ -45,7 +45,8 @@ pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_ba
 #pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_finetune/bert_lonely_finetune.pth'
 
 # Eval checkpoint
-eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/best_checkpoint.pth'
+#eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_bilstm_384/best_checkpoint.pth'
+eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_bilstm_384/checkpoint_08.pth'
 #eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/checkpoint_28.pth'
 
 # Checkpoint
