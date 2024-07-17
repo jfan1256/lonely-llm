@@ -1,5 +1,6 @@
 # Output
-output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_bilstm_384'
+output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_focal'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train'
 
 # Data
 train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
@@ -14,12 +15,12 @@ test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed
 train_device: 'cuda:0'
 eval_device: 'cuda:1'
 
-# Type
-type: 'bert'
-bert_model: 'bert-base-uncased'
+# Dropout rate
+dropout_rate: 0.5
 
 # Alpha for loss allocation
-alpha: 0.7 # Ratio of loss_lonely to loss_sentiment (i.e., 0.7 * loss_lonely + (1 - 0.7) * loss_sentiment)
+#alpha: 0.7 # Ratio of loss_lonely to loss_sentiment (i.e., 0.7 * loss_lonely + (1 - 0.7) * loss_sentiment)
+alpha: 1.0 # Ratio of loss_lonely to loss_sentiment (i.e., 0.7 * loss_lonely + (1 - 0.7) * loss_sentiment)
 
 # Focal Loss
 alpha_focal: 0.7 # Higher value penalizes positive over negative more
@@ -45,9 +46,7 @@ pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_ba
 #pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_finetune/bert_lonely_finetune.pth'
 
 # Eval checkpoint
-#eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_bilstm_384/best_checkpoint.pth'
-eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_bilstm_384/checkpoint_08.pth'
-#eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/checkpoint_28.pth'
+eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/checkpoint_16.pth'
 
 # Checkpoint
 checkpoint: None

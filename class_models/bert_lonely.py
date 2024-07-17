@@ -12,8 +12,6 @@ from class_models.utils import load_checkpoint, tie_encoder_decoder_weights, set
 class BertLonely(nn.Module):
     def __init__(self,
                  configs,
-                 num_layers=1,
-                 dropout_rate=0.5
                  ):
         super().__init__()
 
@@ -65,8 +63,8 @@ class BertLonely(nn.Module):
         self.attention_layer = nn.Linear(64*2, 1)
 
         # Dropout
-        self.dropout1 = nn.Dropout(dropout_rate)
-        self.dropout2 = nn.Dropout(dropout_rate)
+        self.dropout1 = nn.Dropout(configs['dropout_rate'])
+        self.dropout2 = nn.Dropout(configs['dropout_rate'])
 
         # Classifier
         self.connect_layer = nn.Linear(64*2, 32)

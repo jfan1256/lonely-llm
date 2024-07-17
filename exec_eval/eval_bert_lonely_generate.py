@@ -62,9 +62,9 @@ if __name__ == '__main__':
             constrast_loss.append(loss_constrast.item())
             reason_loss.append(loss_reason.item())
 
-            # # Generate
-            # reason = bert_lonely.generate(prompt=prompt, max_length=128, device=configs['eval_device'])
-            # reason_collect.extend(reason)
+            # Generate
+            reason = bert_lonely.generate(prompt=prompt, max_length=128, device=configs['eval_device'])
+            reason_collect.extend(reason)
 
     # Create prediction labels
     if len(reason_collect) < 1:
