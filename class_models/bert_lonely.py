@@ -111,7 +111,7 @@ class BertLonely(nn.Module):
         loss_lonely = focal_loss(logits_lonely, label, alpha=self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
         loss_sentiment = focal_loss(logits_sentiment, sentiment, alpha=1-self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
 
-        # ******************Focal Loss***********************
+        # ******************Dice Loss***********************
         loss_dice = dice_loss(logits_lonely, label)
 
         # ******************Tversky Loss***********************
