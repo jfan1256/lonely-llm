@@ -57,6 +57,8 @@ if __name__ == '__main__':
             sentiment_loss = []
             dice_loss = []
             tversky_loss = []
+            center_loss = []
+            angular_loss = []
             constrast_loss = []
             reason_loss = []
             reason_collect = []
@@ -66,13 +68,15 @@ if __name__ == '__main__':
                     sentiment = bert_lonely.get_sentiment(prompt)
                     sentiment = torch.tensor(sentiment, dtype=torch.float).to(current_configs['eval_device'])
 
-                    loss_binary, loss_sentiment, loss_dice, loss_tversky, loss_constrast, loss_reason, labels = bert_lonely(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=current_configs['eval_device'])
+                    loss_binary, loss_sentiment, loss_dice, loss_tversky, loss_center, loss_angular, loss_constrast, loss_reason, labels = bert_lonely(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=current_configs['eval_device'])
                     labels = labels.detach().cpu().numpy().tolist()
                     label_collect.extend(labels)
                     lonely_loss.append(loss_binary.item())
                     sentiment_loss.append(loss_sentiment.item())
                     dice_loss.append(loss_dice.item())
                     tversky_loss.append(loss_tversky.item())
+                    center_loss.append(loss_center.item())
+                    angular_loss.append(loss_angular.item())
                     constrast_loss.append(loss_constrast.item())
                     reason_loss.append(loss_reason.item())
 
@@ -85,7 +89,7 @@ if __name__ == '__main__':
                 best_model = file
 
             # Log detailed metrics
-            print(f"{file} --> F1 Score: {f1:.4f}  Precision: {precision_score(eval['true_label'], eval['pred_label'], average='binary'):.4f}  Recall: {recall_score(eval['true_label'], eval['pred_label'], average='binary'):.4f}  Loss Lonely: {np.mean(lonely_loss):.4f}  Loss Sentiment: {np.mean(sentiment_loss):.4f}  Loss Dice: {np.mean(dice_loss):.4f}  Loss Tversky: {np.mean(tversky_loss):.4f}  Loss Constrast: {np.mean(constrast_loss):.4f}  Loss Reason: {np.mean(reason_loss):.4f}", file=log_file, flush=True)
+            print(f"{file} --> F1 Score: {f1:.4f}  Precision: {precision_score(eval['true_label'], eval['pred_label'], average='binary'):.4f}  Recall: {recall_score(eval['true_label'], eval['pred_label'], average='binary'):.4f}  Loss Lonely: {np.mean(lonely_loss):.4f}  Loss Sentiment: {np.mean(sentiment_loss):.4f}  Loss Dice: {np.mean(dice_loss):.4f}  Loss Tversky: {np.mean(tversky_loss):.4f}  Loss Center: {np.mean(center_loss):.4f}   Loss Angular: {np.mean(angular_loss):.4f}  Loss Constrast: {np.mean(constrast_loss):.4f}  Loss Reason: {np.mean(reason_loss):.4f}", file=log_file, flush=True)
 
     # Log best model
     print(f"Best model: {best_model} with F1 Score: {best_f1}", file=log_file)

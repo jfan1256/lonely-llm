@@ -1,6 +1,11 @@
 # Output
-output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_focal'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_focal'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_no_connect'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_fnn'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_dropout'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_center'
+output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_no_attn'
 
 # Data
 train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
@@ -14,13 +19,17 @@ test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed
 # Device
 train_device: 'cuda:0'
 eval_device: 'cuda:1'
+#train_device: 'cuda:1'
+#eval_device: 'cuda:0'
 
 # Dropout rate
 dropout_rate: 0.5
 
 # Alpha for loss allocation
-#alpha: 0.7 # Ratio of loss_lonely to loss_sentiment (i.e., 0.7 * loss_lonely + (1 - 0.7) * loss_sentiment)
-alpha: 1.0 # Ratio of loss_lonely to loss_sentiment (i.e., 0.7 * loss_lonely + (1 - 0.7) * loss_sentiment)
+alpha: 0.7 # Ratio of loss_lonely to loss_sentiment (i.e., 0.7 * loss_lonely + (1 - 0.7) * loss_sentiment)
+
+# Center Loss
+alpha_center: 0.5
 
 # Focal Loss
 alpha_focal: 0.7 # Higher value penalizes positive over negative more
@@ -31,7 +40,10 @@ alpha_tverksy: 0.3 # Higher value penalizes False Negatives (identifying a perso
 beta_tversky: 0.7 # Higher value penalizes False Positives (identifying a person as lonely when they actually are not)
 
 # Constrastive Loss
-margin: 1.0 # Distance between positive and negative embeddings
+margin_constrast: 1.0 # Distance between positive and negative embeddings
+
+# Angular Loss
+margin_angular: 45 # Angle between positive and negative embeddings
 
 # Number of attention heads for classifier
 num_head_classifier: 8

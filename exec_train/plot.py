@@ -17,10 +17,10 @@ def get_fold_colormap(fold):
     return brighten_colors(base_colormaps[fold % len(base_colormaps)])
 
 # Plot Diagnostics
-def plot_diagnostics(lonely_loss_train_collect, lonely_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, dice_loss_train_collect, dice_loss_val_collect, tversky_loss_train_collect, tversky_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect):
-    fig, axes = plt.subplots(6, 2, figsize=(30, 10))
-    titles = ['Lonely Loss Train (per mini-batch)', 'Lonely Loss Val (per epoch)', 'Sentiment Loss Train (per mini-batch)', 'Sentiment Loss Val (per epoch)', 'Dice Loss Train (per mini-batch)', 'Dice Loss Val (per epoch)', 'Tversky Loss Train (per mini-batch)', 'Tversky Loss Val (per epoch)', 'Constrastive Loss Train (per mini-batch)', 'Constrastive Loss Val (per epoch)', 'Reason Loss Train (per mini-batch)', 'Reason Loss Val (per epoch)']
-    data = [lonely_loss_train_collect, lonely_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, dice_loss_train_collect, dice_loss_val_collect, tversky_loss_train_collect, tversky_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect]
+def plot_diagnostics(lonely_loss_train_collect, lonely_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, dice_loss_train_collect, dice_loss_val_collect, tversky_loss_train_collect, tversky_loss_val_collect, center_loss_train_collect, center_loss_val_collect, angular_loss_train_collect, angular_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect):
+    fig, axes = plt.subplots(8, 2, figsize=(60, 30))
+    titles = ['Lonely Loss Train (per mini-batch)', 'Lonely Loss Val (per epoch)', 'Sentiment Loss Train (per mini-batch)', 'Sentiment Loss Val (per epoch)', 'Dice Loss Train (per mini-batch)', 'Dice Loss Val (per epoch)', 'Tversky Loss Train (per mini-batch)', 'Tversky Loss Val (per epoch)', 'Center Loss Train (per mini-batch)', 'Center Loss Val (per epoch)', 'Angular Loss Train (per mini-batch)', 'Angular Loss Val (per epoch)', 'Constrastive Loss Train (per mini-batch)', 'Constrastive Loss Val (per epoch)', 'Reason Loss Train (per mini-batch)', 'Reason Loss Val (per epoch)']
+    data = [lonely_loss_train_collect, lonely_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, dice_loss_train_collect, dice_loss_val_collect, tversky_loss_train_collect, tversky_loss_val_collect, center_loss_train_collect, center_loss_val_collect, angular_loss_train_collect, angular_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect]
 
     for ax, losses, title in zip(axes.ravel(), data, titles):
         patches = []
