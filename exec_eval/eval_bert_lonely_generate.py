@@ -13,7 +13,7 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 from utils.print import print_header
 from class_models.utils import set_seed
 from utils.system import get_configs
-from class_models.bert_lonely import init_bert_lonely
+from class_models.bert_lonely_1 import init_bert_lonely
 from class_dataloader.dataloader_reddit_lonely import RedditLonelyTrain
 
 if __name__ == '__main__':

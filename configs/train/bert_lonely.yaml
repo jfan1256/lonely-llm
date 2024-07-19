@@ -4,8 +4,9 @@
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_no_connect'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_fnn'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_dropout'
-#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_center'
-output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_no_attn'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_center_angular'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_no_attn'
+output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train_center'
 
 # Data
 train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
@@ -17,10 +18,10 @@ test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed
 #test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
 
 # Device
-train_device: 'cuda:0'
-eval_device: 'cuda:1'
-#train_device: 'cuda:1'
-#eval_device: 'cuda:0'
+#train_device: 'cuda:0'
+#eval_device: 'cuda:1'
+train_device: 'cuda:1'
+eval_device: 'cuda:0'
 
 # Dropout rate
 dropout_rate: 0.5
@@ -30,6 +31,9 @@ alpha: 0.7 # Ratio of loss_lonely to loss_sentiment (i.e., 0.7 * loss_lonely + (
 
 # Center Loss
 alpha_center: 0.5
+
+# Margin Loss
+margin_lmcl: 0.35
 
 # Focal Loss
 alpha_focal: 0.7 # Higher value penalizes positive over negative more
@@ -41,9 +45,6 @@ beta_tversky: 0.7 # Higher value penalizes False Positives (identifying a person
 
 # Constrastive Loss
 margin_constrast: 1.0 # Distance between positive and negative embeddings
-
-# Angular Loss
-margin_angular: 45 # Angle between positive and negative embeddings
 
 # Number of attention heads for classifier
 num_head_classifier: 8

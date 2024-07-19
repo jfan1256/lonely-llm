@@ -22,7 +22,6 @@ from class_models.bert_lonely import init_bert_lonely
 from class_dataloader.dataloader_reddit_lonely import RedditLonelyTrain
 from class_models.metrics import MetricLogger, SmoothedValue, cosine_lr_schedule, warmup_lr_schedule, step_lr_schedule
 
-
 # Training Loop
 def train(epoch, model, dataloader, optimizer, configs):
     # Loss collector

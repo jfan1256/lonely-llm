@@ -26,28 +26,36 @@ def dice_loss(logits, true_labels, smooth=1.0):
     return 1 - dice_score
 
 # Center Loss
-def center_loss(features, labels, centers, alpha=0.5):
+def center_loss(features, labels, centers, alpha):
     labels = labels.long()
+    num_classes = centers.shape[0]
     centers_batch = centers[labels]
     diff = features - centers_batch
-    updated_centers = centers_batch - alpha * diff
-    centers.data[labels] = updated_centers.data
-    loss = (diff ** 2).sum() / (2.0 * features.shape[1])
+    squared_distances = torch.sum(torch.pow(diff, 2), dim=1)
+    center_loss = torch.mean(squared_distances)
+    unique_labels, unique_indices = torch.unique(labels, sorted=True, return_inverse=True)
+    labels_count = torch.zeros(num_classes, device=features.device).index_add_(0, unique_labels, torch.ones_like(unique_labels, dtype=torch.float))
+    accumulated_diffs = torch.zeros_like(centers).index_add_(0, labels, diff)
+    if center_loss.requires_grad:
+        def backward_hook(grad):
+            centers.grad = -alpha * (accumulated_diffs / (labels_count.unsqueeze(1) + 1e-6))
+            return grad
+        center_loss.register_hook(backward_hook)
+    return center_loss
+
+# Large Margin Cosine (Analogous to Angular Loss)
+def large_margin_cosine_loss(output, label, margin=0.35, scale=30.0):
+    label = label.long()
+    normalized_output = F.normalize(output, dim=1)
+    cosine = torch.matmul(normalized_output, normalized_output.T)
+    one_hot = torch.zeros_like(cosine).scatter_(1, label.view(-1, 1), 1)
+    margin_cosine = cosine - one_hot * margin
+    cosine = cosine - torch.eye(cosine.size(0), device=cosine.device) * cosine
+    margin_cosine = margin_cosine - torch.eye(margin_cosine.size(0), device=margin_cosine.device) * margin_cosine
+    output = torch.where(one_hot == 1, margin_cosine, cosine) * scale
+    loss = F.cross_entropy(output, label)
     return loss
 
-# Angular Loss (Analogous to Triplet Loss)
-def angular_loss(features, labels, margin=45, eps=1e-8):
-    dot = torch.matmul(features, features.t())
-    norms = features.norm(p=2, dim=1)
-    cosine = dot / (norms[:, None] * norms[None, :] + eps)
-    angles = torch.acos(torch.clamp(cosine, -1 + eps, 1 - eps)) * 180 / torch.pi
-    # Create masks for positive (same class) and negative (different class) pairs
-    positive_mask = labels[:, None] == labels[None, :]
-    negative_mask = labels[:, None] != labels[None, :]
-    # Angular loss calculation
-    positive_loss = torch.mean(F.relu(margin - angles[positive_mask]))
-    negative_loss = torch.mean(F.relu(angles[negative_mask] - margin))
-    return positive_loss + negative_loss
 
 # Constrastive Loss (Analogous to Euclidean Constrastive Loss)
 def constrast_loss(features, labels, margin):
