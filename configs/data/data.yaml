@@ -1,0 +1,10 @@
+# Generate Reason
+#data_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/human_annotations_all_8000_overall.csv'
+#output_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/lonely_narrative_label_reason.csv'
+data_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
+output_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/dreaddit_train_gpt4o.csv'
+#data_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-val.csv'
+#output_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/dreaddit_val_gpt4o.csv'
+#data_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-test.csv'
+#output_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/dreaddit_test_gpt4o.csv'
+subject: 'stress'

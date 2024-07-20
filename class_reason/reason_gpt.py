@@ -1,47 +1,32 @@
 import os
-import io
+import time
 import yaml
-import base64
-import numpy as np
 import pandas as pd
 
 from tqdm import tqdm
-from PIL import Image
 from openai import OpenAI
 
 from utils.system import get_configs
+from class_dataloader.utils import preprocess_text
 
 class ReasonGPT:
-    # Initialize
-    def __init__(self,
-                 data_path,
-                 output_path
-                 ):
-
+    def __init__(self, data_path, output_path, subject):
         self.data_path = data_path
         self.output_path = output_path
+        self.subject = subject
+        self.api_key = yaml.safe_load(open(get_configs() / 'api' / 'api.yaml'))['openai']
+        self.client = OpenAI(api_key=self.api_key)
 
-    # Create item list
     def _create_item_list(self):
-        # Convert tags to strings
         data = pd.read_csv(self.data_path)
-        items = data['body'].values.tolist()
-        self.items = items
+        text = data['narrative'].values.tolist()
+        label = data['label'].values.tolist()
+        items = list(zip(text, label))
+        return items
 
-    @staticmethod
-    # Get word count for column
-    def _word_count(texts):
-        counts = np.zeros(len(texts), dtype=np.int32)
-        for i, text in enumerate(texts):
-            counts[i] = len(text.split())
-        return counts
-
-    # Get gpt topic
-    def _gpt_topic(self, item):
-        api_key = yaml.safe_load(open(get_configs() / 'api' / 'api.yaml'))['openai']
-        client = OpenAI(api_key=api_key)
-
-        response = client.chat.completions.create(
+    def _gpt_topic(self, narrative, label):
+        narrative = preprocess_text(narrative)
+        response = self.client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {
@@ -49,9 +34,12 @@ class ReasonGPT:
                     "content": [
                         {
                             "type": "text",
-                            "text": f"Role: {self.ROLE}"
-                                    f"Task: Formulate a search query to locate a specific image. Use lowercase and no punctuation."
-                                    f"Description: The user might not recall precise details about the image. Craft a query that is sufficiently broad to encompass possible variations, yet detailed enough to facilitate an effective search."
+                            "text": f"Role: Psychiatrist\n"
+	                                f"Description: Label 1 indicates the narrative was written by a {self.subject} person; 0 indicates otherwise.\n"
+                                    f"Requirements: Adhere strictly to the label irrespective of the narrative content. Explain why the person is {self.subject} if the label is 1; if it is 0, explain why they are not.\n"
+                                    f"Task: Review the narrative and label below. Provide reasoning for the classification in all lowercase, with minimal punctuation, and avoid direct reference to the label.\n"
+                                    f"Narrative: {narrative}\n"''
+                                    f"Label: {label}"
                         },
                     ],
                 }
@@ -62,32 +50,27 @@ class ReasonGPT:
             frequency_penalty=0,
             presence_penalty=0,
         )
-
-        summary = response.choices[0].message.content.translate(str.maketrans('', '', '."')).lower()
+        summary = response.choices[0].message.content.replace('\n', '').lower()
         return summary
 
-    def _get_gpt_topic(self):
-        all_summary = []
-        for item in tqdm(self.items, desc='Processing items'):
-            summary = self._gpt_topic(item)
-            all_summary.append(summary)
-        return all_summary
+    def _process_items(self, items):
+        # Check for existing file and read it
+        if os.path.exists(self.output_path):
+            processed_data = pd.read_csv(self.output_path)
+            processed_narratives = set(processed_data['narrative'])
+        else:
+            processed_data = pd.DataFrame(columns=['narrative', 'label', 'reason'])
+            processed_narratives = set()
 
-    # Execute parallelized gpt prompt dataframe creation
-    def prompt_gpt(self):
-        # Create item list
-        self._create_item_list()
+        # Process new items
+        for narrative, label in tqdm(items, desc='Processing items'):
+            if narrative not in processed_narratives:
+                reason = self._gpt_topic(narrative, label)
+                new_data = pd.DataFrame([[narrative, label, reason]], columns=['narrative', 'label', 'reason'])
+                processed_data = pd.concat([processed_data, new_data], ignore_index=True)
+                processed_data.to_csv(self.output_path, index=False)
+                time.sleep(0.5)
 
-        # Retrieve reason
-        reason = self._get_gpt_topic()
-
-        # Export Dataframe
-        data = pd.read_csv(self.data_path)
-        data['reason'] = reason
-
-        # Word count
-        data['word_count_prompt'] = self._word_count(data['body'].values)
-        data['word_count_reason'] = self._word_count(data['reason'].values)
-
-        # Export Good Query
-        data.to_csv(f"{self.output_path}.csv", index=False)
+    def reason_gpt(self):
+        items = self._create_item_list()
+        self._process_items(items)

@@ -71,8 +71,8 @@ class BertLonely(nn.Module):
         self.classifier_lonely = nn.Linear(32, 1)
         self.classifier_sentiment = nn.Linear(32, 1)
 
-        # Center
-        self.centers = nn.Parameter(torch.randn(2, 64*2))
+        # # Center
+        # self.centers = nn.Parameter(torch.randn(2, 64*2))
 
     # Get sentiment (via VADER)
     def get_sentiment(self, texts):
@@ -111,8 +111,8 @@ class BertLonely(nn.Module):
         prob = torch.sigmoid(logits_lonely)
 
         # ******************Focal Loss***********************
-        loss_lonely = focal_loss(logits_lonely, label, alpha=self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
-        loss_sentiment = focal_loss(logits_sentiment, sentiment, alpha=1-self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
+        # loss_lonely = focal_loss(logits_lonely, label, alpha=self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
+        # loss_sentiment = focal_loss(logits_sentiment, sentiment, alpha=1-self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
         loss_lonely = torch.zeros(1, device=device)
         loss_sentiment = torch.zeros(1, device=device)
 
@@ -123,10 +123,11 @@ class BertLonely(nn.Module):
         loss_tversky = tversky_loss(logits_lonely, label, alpha=self.configs['alpha_tverksy'], beta=self.configs['beta_tversky'])
 
         # ******************Center Loss***********************
-        loss_center = center_loss(attended_output, label, self.centers, alpha=self.configs['alpha_center'])
+        # loss_center = center_loss(attended_output, label, self.centers, alpha=self.configs['alpha_center'])
+        loss_center = torch.zeros(1, device=device)
 
         # ******************Angular Loss***********************
-        # loss_angular = large_margin_cosine_loss(attended_output, label, margin=self.configs['margin_lmcl'])
+        # loss_angular = large_margin_cosine_loss(attended_output, label, margin=self.configs['margin_angular'])
         loss_angular = torch.zeros(1, device=device)
 
         # ******************Constrastive Loss***********************
