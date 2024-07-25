@@ -17,6 +17,36 @@ from utils.system import get_configs
 from class_models.bert_lonely import init_bert_lonely
 from class_dataloader.dataloader_reddit_lonely import RedditLonelyTrain
 
+def read_evaluated_checkpoints(log_path):
+    evaluated_checkpoints = set()
+    if os.path.exists(log_path):
+        with open(log_path, 'r') as file:
+            for line in file:
+                if 'checkpoint' in line:
+                    parts = line.split()
+                    checkpoint_name = parts[0]
+                    evaluated_checkpoints.add(checkpoint_name)
+    return evaluated_checkpoints
+
+def get_and_remove_best_model(log_path):
+    best_model = None
+    best_f1 = 0
+    lines_to_keep = []
+    if os.path.exists(log_path):
+        with open(log_path, 'r') as file:
+            lines = file.readlines()
+        for line in lines:
+            if line.startswith('Best model:'):
+                parts = line.strip().split()
+                best_model = parts[2]
+                best_f1 = float(parts[-1])
+            else:
+                lines_to_keep.append(line)
+        with open(log_path, 'w') as file:
+            file.writelines(lines_to_keep)
+    return best_model, best_f1
+
+
 if __name__ == '__main__':
     # Set seed
     set_seed(20050531)
@@ -34,12 +64,13 @@ if __name__ == '__main__':
     checkpoint_folder = configs['output_dir']
 
     # Logging setup
-    log_file = open(f"{checkpoint_folder}/eval_metric.txt", "w")
-    best_f1 = 0
-    best_model = ''
+    log_file_path = f"{checkpoint_folder}/eval_metric.txt"
+    best_model, best_f1 = get_and_remove_best_model(log_file_path)
+    log_file = open(log_file_path, "a")
+    evaluated_checkpoints = read_evaluated_checkpoints(log_file_path)
 
     for file in sorted(os.listdir(checkpoint_folder)):
-        if file.startswith('checkpoint') and file.endswith('.pth'):
+        if file.startswith('checkpoint') and file.endswith('.pth') and file not in evaluated_checkpoints:
             # Load the current checkpoint
             checkpoint_path = os.path.join(checkpoint_folder, file)
             print_header(f"Evaluating {file}")
@@ -61,7 +92,6 @@ if __name__ == '__main__':
             angular_loss = []
             constrast_loss = []
             reason_loss = []
-            reason_collect = []
             with torch.no_grad():
                 for (index, prompt, label, reason) in tqdm(dataloader, desc='Evaluate'):
                     label = torch.tensor(label, dtype=torch.float).to(current_configs['eval_device'])

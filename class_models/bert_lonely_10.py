@@ -2,9 +2,10 @@ import torch
 import torch.nn.functional as F
 
 from torch import nn
-from transformers import BertTokenizer
+from transformers import AutoTokenizer,BertTokenizer
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
+from utils.system import get_store_model
 from class_models.bert import BertConfig, BertModel, BertLMHeadModel
 from class_models.utils import load_checkpoint, tie_encoder_decoder_weights, set_trainable
 from class_models.loss import focal_loss, tversky_loss, dice_loss, center_loss, constrast_loss, large_margin_cosine_loss
@@ -19,20 +20,23 @@ class BertLonely(nn.Module):
         self.configs = configs
 
         # Tokenizer
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        # self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        self.tokenizer = BertTokenizer.from_pretrained("mental/mental-bert-base-uncased")
         self.tokenizer.add_special_tokens({'bos_token': '[DEC]'})
         self.tokenizer.add_special_tokens({'additional_special_tokens': ['[ENC]']})
         self.tokenizer.enc_token_id = self.tokenizer.additional_special_tokens_ids[0]
 
         # Text Encoder
         bert_config = BertConfig.from_json_file(self.configs['bert_config'])
-        self.text_encoder = BertModel.from_pretrained('bert-base-uncased', config=bert_config, add_pooling_layer=False, ignore_mismatched_sizes=True)
+        # self.text_encoder = BertModel.from_pretrained('bert-base-uncased', config=bert_config, add_pooling_layer=False, ignore_mismatched_sizes=True)
+        self.text_encoder = BertModel.from_pretrained("mental/mental-bert-base-uncased", config=bert_config, add_pooling_layer=False, ignore_mismatched_sizes=True)
         self.text_encoder.resize_token_embeddings(len(self.tokenizer))
         total = sum([param.nelement() for param in self.text_encoder.parameters()])
         print('Text Encoder Number of Params: %.2fM' % (total / 1e6))
 
         # Text Decoder
-        self.text_decoder = BertLMHeadModel.from_pretrained('bert-base-uncased', config=bert_config)
+        # self.text_decoder = BertLMHeadModel.from_pretrained('bert-base-uncased', config=bert_config)
+        self.text_decoder = BertLMHeadModel.from_pretrained("mental/mental-bert-base-uncased", config=bert_config)
         total = sum([param.nelement() for param in self.text_decoder.parameters()])
         self.text_decoder.resize_token_embeddings(len(self.tokenizer))
         print('Text Decoder Number of Params: %.2fM' % (total / 1e6))
@@ -41,11 +45,11 @@ class BertLonely(nn.Module):
         print("\n********** Tie Encoder and Decoder **********")
         tie_encoder_decoder_weights(self.text_encoder, self.text_decoder.bert, '', '/attention')
 
-        # Freeze parameters of the text_encoder and text_decoder to not train them
-        encoder_layers_to_train = ['encoder.layer.11.']
-        decoder_layers_to_train = ['bert.encoder.layer.11.']
-        set_trainable(model_component=self.text_encoder, layer_names=encoder_layers_to_train, type='encoder', include_predictions=False, include_embeddings=False)
-        set_trainable(model_component=self.text_decoder, layer_names=decoder_layers_to_train, type='decoder', include_predictions=True, include_embeddings=False)
+        # # Freeze parameters of the text_encoder and text_decoder to not train them
+        # encoder_layers_to_train = ['encoder.layer.11.']
+        # decoder_layers_to_train = ['bert.encoder.layer.11.']
+        # set_trainable(model_component=self.text_encoder, layer_names=encoder_layers_to_train, type='encoder', include_predictions=False, include_embeddings=False)
+        # set_trainable(model_component=self.text_decoder, layer_names=decoder_layers_to_train, type='decoder', include_predictions=True, include_embeddings=False)
 
         print("\n********** Text Encoder Trainable Status **********")
         for name, param in self.text_encoder.named_parameters():
@@ -59,22 +63,23 @@ class BertLonely(nn.Module):
         self.bilstm = nn.LSTM(768, 64, num_layers=1, batch_first=True, bidirectional=True)
 
         # Multi-head Attention Layer
-        self.multihead_attention = nn.MultiheadAttention(embed_dim=64*2, num_heads=self.configs['num_head_classifier'], batch_first=True)
-        self.attention_layer = nn.Linear(64*2, 1)
+        self.multihead_attention = nn.MultiheadAttention(embed_dim=64 * 2, num_heads=self.configs['num_head_classifier'], batch_first=True)
+        self.attention_layer = nn.Linear(64 * 2, 1)
 
         # Dropout
         self.dropout1 = nn.Dropout(configs['dropout_rate'])
         self.dropout2 = nn.Dropout(configs['dropout_rate'])
 
         # Classifier FNN
-        self.connect_layer = nn.Linear(64*2, 32)
+        self.connect_layer = nn.Linear(64 * 2, 32)
         self.classifier_lonely = nn.Linear(32, 1)
         self.classifier_sentiment = nn.Linear(32, 1)
 
         # # Center
         # self.centers = nn.Parameter(torch.randn(2, 64*2))
 
-    # Get sentiment (via VADER)
+        # Get sentiment (via VADER)
+
     def get_sentiment(self, texts):
         analyzer = SentimentIntensityAnalyzer()
         sentiment_scores = []
@@ -84,7 +89,8 @@ class BertLonely(nn.Module):
             sentiment_scores.append(label)
         return sentiment_scores
 
-    # Loss function
+        # Loss function
+
     def forward(self, index, prompt, label, reason, sentiment, device):
         # Get text embedding (analogous to prompt embedding)
         text = self.tokenizer(prompt, padding='max_length', truncation=True, return_tensors="pt").to(device)
@@ -138,7 +144,7 @@ class BertLonely(nn.Module):
         reason = [self.configs['prompt'] + item for item in reason]
 
         # Tokenize and encode the reason
-        text_reason = self.tokenizer(reason, padding='max_length', truncation=True, return_tensors="pt", mode='text').to(device)
+        text_reason = self.tokenizer(reason, padding='max_length', truncation=True, return_tensors="pt").to(device)
 
         # Prepare decoder input using prompt's last hidden state
         decoder_input_ids = text_reason.input_ids.clone()
@@ -156,7 +162,8 @@ class BertLonely(nn.Module):
         loss_reason = outputs.loss
         return loss_lonely, loss_sentiment, loss_dice, loss_tversky, loss_center, loss_angular, loss_constrast, loss_reason, prob
 
-    # Classify
+        # Classify
+
     def classify(self, prompt, device):
         # Get text embedding (analogous to prompt embedding)
         text = self.tokenizer(prompt, padding='max_length', truncation=True, return_tensors="pt").to(device)

@@ -48,18 +48,15 @@ def train(epoch, model, dataloader, optimizer, configs):
     metric_logger.add_meter('loss_angular', SmoothedValue(window_size=50, fmt='{value:.6f}'))
     metric_logger.add_meter('loss_constrast', SmoothedValue(window_size=50, fmt='{value:.6f}'))
     metric_logger.add_meter('loss_reason', SmoothedValue(window_size=50, fmt='{value:.6f}'))
-    metric_logger.add_meter('lr', SmoothedValue(window_size=50, fmt='{value:.8f}'))
+    metric_logger.add_meter('lr_bert', SmoothedValue(window_size=50, fmt='{value:.8f}'))
+    metric_logger.add_meter('lr_mlp', SmoothedValue(window_size=50, fmt='{value:.8f}'))
 
     # Print frequency
     header = 'Train Epoch: [{}]'.format(epoch)
-    print_freq = 10
+    print_freq = 50
 
     # Iterate through images
     for i, (index, prompt, label, reason) in enumerate(metric_logger.log_every(dataloader, print_freq, header)):
-        # Warmup learning rate for first epoch
-        if epoch == 1:
-            warmup_lr_schedule(optimizer, i, configs['warmup_steps'], configs['warmup_lr'], configs['init_lr'])
-
         # Set device
         label = torch.tensor(label, dtype=torch.float).to(configs['train_device'])
 
@@ -96,7 +93,8 @@ def train(epoch, model, dataloader, optimizer, configs):
         metric_logger.update(loss_angular=loss_angular.item())
         metric_logger.update(loss_constrast=loss_constrast.item())
         metric_logger.update(loss_reason=loss_reason.item())
-        metric_logger.update(lr=optimizer.param_groups[0]["lr"])
+        metric_logger.update(lr_bert=optimizer.param_groups[0]["lr"])
+        metric_logger.update(lr_mlp=optimizer.param_groups[1]["lr"])
 
     # Gather the stats from all processes
     metric_logger.synchronize_between_processes()
@@ -166,7 +164,13 @@ def main(configs):
 
     # Initialize optimizer
     print_header("Initialize Optimizer")
-    optimizer = torch.optim.AdamW(params=model.parameters(), lr=configs['init_lr'], weight_decay=configs['weight_decay'])
+    encoder_decoder_params = list(model.text_encoder.parameters()) + list(model.text_decoder.parameters())
+    mlp_params = list(model.mlp.parameters())
+    optimizer = torch.optim.AdamW([
+        {'params': encoder_decoder_params, 'lr': configs['bert_lr']},
+        {'params': mlp_params, 'lr': configs['mlp_lr']}
+    ], weight_decay=configs['weight_decay'])
+    # optimizer = torch.optim.AdamW(params=model.parameters(), lr=configs['init_lr'], weight_decay=configs['weight_decay'])
 
     # Load checkpoint
     start_epoch = 0
@@ -193,9 +197,9 @@ def main(configs):
         # Print
         print_header(f"Epoch {epoch}")
 
-        # # Step the learning rate
-        # cosine_lr_schedule(optimizer, epoch, configs['max_epoch'], configs['init_lr'], configs['min_lr'])
-        step_lr_schedule(optimizer, epoch - 1, configs['init_lr'], configs['min_lr'], configs['lr_decay_rate'])
+        # Step the learning rate
+        cosine_lr_schedule(optimizer, 0, epoch, configs['max_epoch'], configs['bert_lr'], configs['min_lr'])
+        cosine_lr_schedule(optimizer, 1, epoch, configs['max_epoch'], configs['mlp_lr'], configs['min_lr'])
 
         # Train model
         train_stats, lonely_loss_train_collector, sentiment_loss_train_collector, dice_loss_train_collector, tversky_loss_train_collector, center_loss_train_collector, angular_loss_train_collector, constrast_loss_train_collector, reason_loss_train_collector = train(epoch=epoch, model=model, dataloader=train_dataloader, optimizer=optimizer, configs=configs)
