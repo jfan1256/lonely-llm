@@ -6,54 +6,77 @@ from matplotlib.patches import Patch
 from matplotlib.colors import ListedColormap
 from matplotlib.collections import LineCollection
 
-def brighten_colors(cmap, factor=0.5):
+def brighten_colors(cmap, factor=0.2):
     c = cmap(np.arange(cmap.N))
     c[:, :-1] += (1.0 - c[:, :-1]) * factor
     c = np.clip(c, 0, 1)
     return ListedColormap(c)
 
-def get_fold_colormap(fold):
+def get_fold_colormap(fold, brighten=True):
     base_colormaps = [cm.plasma, cm.viridis, cm.inferno, cm.magma, cm.cividis]
-    return brighten_colors(base_colormaps[fold % len(base_colormaps)])
+    if brighten:
+        return brighten_colors(base_colormaps[fold % len(base_colormaps)])
+    else:
+        return base_colormaps[fold % len(base_colormaps)]
 
 # Plot Diagnostics
-def plot_diagnostics(lonely_loss_train_collect, lonely_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, dice_loss_train_collect, dice_loss_val_collect, tversky_loss_train_collect, tversky_loss_val_collect, center_loss_train_collect, center_loss_val_collect, angular_loss_train_collect, angular_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect):
-    fig, axes = plt.subplots(8, 2, figsize=(60, 30))
-    titles = ['Lonely Loss Train (per mini-batch)', 'Lonely Loss Val (per epoch)', 'Sentiment Loss Train (per mini-batch)', 'Sentiment Loss Val (per epoch)', 'Dice Loss Train (per mini-batch)', 'Dice Loss Val (per epoch)', 'Tversky Loss Train (per mini-batch)', 'Tversky Loss Val (per epoch)', 'Center Loss Train (per mini-batch)', 'Center Loss Val (per epoch)', 'Angular Loss Train (per mini-batch)', 'Angular Loss Val (per epoch)', 'Constrastive Loss Train (per mini-batch)', 'Constrastive Loss Val (per epoch)', 'Reason Loss Train (per mini-batch)', 'Reason Loss Val (per epoch)']
-    data = [lonely_loss_train_collect, lonely_loss_val_collect, sentiment_loss_train_collect, sentiment_loss_val_collect, dice_loss_train_collect, dice_loss_val_collect, tversky_loss_train_collect, tversky_loss_val_collect, center_loss_train_collect, center_loss_val_collect, angular_loss_train_collect, angular_loss_val_collect, constrast_loss_train_collect, constrast_loss_val_collect, reason_loss_train_collect, reason_loss_val_collect]
+def plot_diagnostics(loss_data):
+    num_losses = len(loss_data['train'])
+    fig, axes = plt.subplots(num_losses, 1, figsize=(30, 5 * num_losses))
+    if num_losses == 1:
+        axes = [axes]
 
-    for ax, losses, title in zip(axes.ravel(), data, titles):
-        patches = []
+    for idx, loss_name in enumerate(loss_data['train'].keys()):
+        train_losses = np.array(loss_data['train'][loss_name])
+        val_losses = np.array(loss_data['val'][loss_name])
 
-        for fold, loss in enumerate(losses, 1):
-            x = np.arange(len(loss))
-            y = np.array(loss)
-            points = np.array([x, y]).T.reshape(-1, 1, 2)
-            segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        # Prepare data for gradient plot
+        x_train = np.arange(len(train_losses))
+        y_train = np.array(train_losses)
+        points_train = np.array([x_train, y_train]).T.reshape(-1, 1, 2)
+        segments_train = np.concatenate([points_train[:-1], points_train[1:]], axis=1)
 
-            colormap = get_fold_colormap(fold)
-            norm = plt.Normalize(y.min(), y.max())
-            lc = LineCollection(segments, cmap=colormap, norm=norm)
-            lc.set_array(y)
-            lc.set_linewidth(2)
-            ax.add_collection(lc)
+        x_val = np.arange(len(val_losses))
+        y_val = np.array(val_losses)
+        points_val = np.array([x_val, y_val]).T.reshape(-1, 1, 2)
+        segments_val = np.concatenate([points_val[:-1], points_val[1:]], axis=1)
 
-            color_for_legend = colormap(norm(y.min()))
-            patches.append(Patch(color=color_for_legend, label=f'Fold {fold}'))
-
-        ax.set_title(title, fontweight='bold', fontsize=14)
-        ax.set_xlabel('Iterations', fontsize=12)
+        # Set up the plot for training and validation loss
+        ax = axes[idx]
+        ax.set_title(f'{loss_name.replace("_", " ").title()} Loss (Train vs. Val)', fontweight='bold', fontsize=14)
+        ax.set_xlabel('Epochs', fontsize=12)
         ax.set_ylabel('Loss', fontsize=12)
+
+        # Training loss plot
+        colormap_train = get_fold_colormap(0, brighten=True)
+        norm_train = plt.Normalize(y_train.min(), y_train.max())
+        lc_train = LineCollection(segments_train, cmap=colormap_train, norm=norm_train)
+        lc_train.set_array(y_train)
+        lc_train.set_linewidth(2)
+        ax.add_collection(lc_train)
+
+        # Validation loss plot
+        colormap_val = get_fold_colormap(3, brighten=True)
+        norm_val = plt.Normalize(y_val.min(), y_val.max())
+        lc_val = LineCollection(segments_val, cmap=colormap_val, norm=norm_val)
+        lc_val.set_array(y_val)
+        lc_val.set_linewidth(2)
+        ax.add_collection(lc_val)
+
+        # Axis and grid setup
         ax.grid(True, linestyle='--', linewidth=0.5)
-        max_iterations = len(losses[0])
-        tick_interval = max(1, max_iterations // 20)
+        max_iterations = max(len(train_losses), len(val_losses))
+        tick_interval = max(1, max_iterations // 15)
         ax.set_xticks(np.arange(0, max_iterations + 1, tick_interval))
-        ax.set_yticks(np.linspace(min(min(losses)), max(max(losses)), num=20))
+        ax.set_yticks(np.linspace(min(y_train.min(), y_val.min()), max(y_train.max(), y_val.max()), num=15))
         ax.autoscale_view()
         for _, spine in ax.spines.items():
             spine.set_linewidth(2)
 
-        ax.legend(handles=patches, loc='upper right', fontsize=10)
+         # Legend setup
+        patch_train = Patch(color=colormap_train(norm_train(y_train.min())), label=f'{loss_name.title()} Train')
+        patch_val = Patch(color=colormap_val(norm_val(y_val.min())), label=f'{loss_name.title()} Val')
+        ax.legend(handles=[patch_train, patch_val], loc='upper right', fontsize=10)
 
     plt.tight_layout()
     plt.show()

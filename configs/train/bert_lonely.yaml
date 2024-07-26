@@ -16,7 +16,20 @@
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_base_mlp'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_focal'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp3'
-output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp64'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.9'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment1'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.3alpha'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.2alpha'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.1alpha'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.25alpha'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.15alpha'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.2alpha0.8focal'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.2alpha0.6focal'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.2alpha1.25constrast'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.2alpha0.75constrast'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best2.1gamma'
+output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_3loss'
 
 # Data
 train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
@@ -62,6 +75,14 @@ prompt: ''
 model_name: 'mental/mental-bert-base-uncased'
 #model_name: 'bert-base-uncased'
 
+# Loss
+loss:
+  - loss_focal
+  - loss_dice
+  - loss_tversky
+  - loss_contrast
+  - loss_reason
+
 # Dropout rate
 dropout_rate: 0.5
 
@@ -70,7 +91,7 @@ num_head_classifier: 8
 
 #********************************************************************************LOSS********************************************************************************
 # Alpha for loss allocation
-alpha: 0.7 # Ratio of loss_lonely to loss_sentiment (i.e., 0.7 * loss_lonely + (1 - 0.7) * loss_sentiment)
+alpha: 0.9 # Ratio of lonely losses to sentiment losses (i.e., 0.75 * loss_focal_lonely + (1 - 0.75) * loss_focal_sentiment)
 
 # Center Loss
 alpha_center: 0.5
@@ -83,8 +104,8 @@ alpha_focal: 0.7 # Higher value penalizes positive over negative more
 gamma_focal: 2 # Higher value penalizes indifferent probabilities
 
 # Tversky Loss
-alpha_tverksy: 0.3 # Higher value penalizes False Negatives (identifying a person as not lonely when they actually are)
-beta_tversky: 0.7 # Higher value penalizes False Positives (identifying a person as lonely when they actually are not)
+alpha_tverksy: 0.2 # Higher value penalizes False Negatives more (identifying a person as not lonely when they actually are)
+beta_tversky: 0.8 # Higher value penalizes False Positives more (identifying a person as lonely when they actually are not)
 
 # Constrastive Loss
-margin_constrast: 1.0 # Distance between positive and negative embeddings
+margin_contrast: 1.0 # Distance between positive and negative embeddings

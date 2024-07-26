@@ -8,7 +8,8 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from utils.system import get_store_model
 from class_models.bert import BertConfig, BertModel, BertLMHeadModel
 from class_models.utils import load_checkpoint, tie_encoder_decoder_weights, set_trainable
-from class_models.loss import focal_loss, tversky_loss, dice_loss, center_loss, constrast_loss, large_margin_cosine_loss
+from class_models.loss import focal_loss, tversky_loss, dice_loss, center_loss, contrast_loss_encoder, large_margin_cosine_loss, contrast_loss_decoder, embed_match_loss, perplex_loss
+
 
 class BertLonely(nn.Module):
     def __init__(self,
@@ -56,29 +57,22 @@ class BertLonely(nn.Module):
         for name, param in self.text_decoder.named_parameters():
             print(f"{name:60} Trainable: {param.requires_grad}")
 
-        # # Multilayer Perceptron
-        # self.mlp = nn.Sequential(
-        #     nn.Linear(bert_config.hidden_size, 256),
-        #     nn.Tanh(),
-        #     nn.Linear(256, 128),
-        #     nn.Tanh(),
-        #     nn.Linear(128, 1)
-        # )
-        # # Multilayer Perceptron
-        # self.mlp = nn.Sequential(
-        #     nn.Linear(bert_config.hidden_size, 512),
-        #     nn.Tanh(),
-        #     nn.Linear(512, 256),
-        #     nn.Tanh(),
-        #     nn.Linear(256, 1)
-        # )
-        # Multilayer Perceptron
-        self.mlp = nn.Sequential(
-            nn.Linear(bert_config.hidden_size, 64),
+        # Multilayer Perceptron for loneliness
+        self.mlp_lonely = nn.Sequential(
+            nn.Linear(bert_config.hidden_size, 512),
             nn.Tanh(),
-            nn.Linear(64, 32),
+            nn.Linear(512, 256),
             nn.Tanh(),
-            nn.Linear(32, 1)
+            nn.Linear(256, 1)
+        )
+
+        # Multilayer Perceptron for sentiment
+        self.mlp_sentiment = nn.Sequential(
+            nn.Linear(bert_config.hidden_size, 512),
+            nn.Tanh(),
+            nn.Linear(512, 256),
+            nn.Tanh(),
+            nn.Linear(256, 1)
         )
 
     # Get sentiment (via VADER)
@@ -99,35 +93,61 @@ class BertLonely(nn.Module):
         text_embed = text_feat.last_hidden_state
 
         # Extract the [CLS] token's final layer features
-        cls_output = text_feat.last_hidden_state[:, 0]
-        logits_lonely = self.mlp(cls_output).squeeze(-1)
-        prob = torch.sigmoid(logits_lonely)
+        enc_cls_output = text_feat.last_hidden_state[:, 0]
+
+        # Classify lonely
+        logits_lonely = self.mlp_lonely(enc_cls_output).squeeze(-1)
+
+        # Classify sentiment
+        logits_sentiment = self.mlp_sentiment(enc_cls_output).squeeze(-1)
 
         # ===============================================Binary Classification Loss (via MLP)===============================================
-        # # ******************BCE Loss***********************
-        # loss_lonely = nn.BCEWithLogitsLoss()(logits_lonely, label.float())
-
         # ******************Focal Loss***********************
-        loss_lonely = focal_loss(logits_lonely, label, alpha=self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
-        # loss_sentiment = focal_loss(logits_sentiment, sentiment, alpha=1-self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
-        loss_sentiment = torch.zeros(1, device=device)
+        if 'loss_focal' in self.configs['loss']:
+            loss_focal_lonely = focal_loss(logits_lonely, label, alpha=self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
+            loss_focal_sentiment = focal_loss(logits_sentiment, sentiment, alpha=1-self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
+            loss_focal = self.configs['alpha'] * loss_focal_lonely + (1 - self.configs['alpha']) * loss_focal_sentiment
+        else:
+            loss_focal = torch.zeroes(1)
 
         # ******************Dice Loss***********************
-        loss_dice = dice_loss(logits_lonely, label)
+        if 'loss_dice' in self.configs['loss']:
+            loss_dice_lonely = dice_loss(logits_lonely, label)
+            loss_dice_sentiment = dice_loss(logits_sentiment, sentiment)
+            loss_dice = self.configs['alpha'] * loss_dice_lonely + (1 - self.configs['alpha']) * loss_dice_sentiment
+        else:
+            loss_dice = torch.zeroes(1)
 
         # ******************Tversky Loss***********************
-        loss_tversky = tversky_loss(logits_lonely, label, alpha=self.configs['alpha_tverksy'], beta=self.configs['beta_tversky'])
+        if 'loss_tversky' in self.configs['loss']:
+            loss_tversky_lonely = tversky_loss(logits_lonely, label, alpha=self.configs['alpha_tverksy'], beta=self.configs['beta_tversky'])
+            loss_tversky_sentiment = tversky_loss(logits_sentiment, sentiment, alpha=self.configs['alpha_tverksy'], beta=self.configs['beta_tversky'])
+            loss_tversky = self.configs['alpha'] * loss_tversky_lonely + (1 - self.configs['alpha']) * loss_tversky_sentiment
+        else:
+            loss_dice = torch.zeroes(1)
 
         # ******************Center Loss***********************
-        # loss_center = center_loss(attended_output, label, self.centers, alpha=self.configs['alpha_center'])
-        loss_center = torch.zeros(1, device=device)
+        if 'loss_center' in self.configs['loss']:
+            loss_center_lonely = center_loss(enc_cls_output, label, self.centers, alpha=self.configs['alpha_center'])
+            loss_center_sentiment = center_loss(enc_cls_output, sentiment, self.centers, alpha=self.configs['alpha_center'])
+            loss_center = self.configs['alpha'] * loss_center_lonely + (1 - self.configs['alpha']) * loss_center_sentiment
+        else:
+            loss_center = torch.zeros(1, device=device)
 
         # ******************Angular Loss***********************
-        # loss_angular = large_margin_cosine_loss(attended_output, label, margin=self.configs['margin_angular'])
-        loss_angular = torch.zeros(1, device=device)
+        if 'loss_angular' in self.configs['loss']:
+            loss_angular_lonely = large_margin_cosine_loss(enc_cls_output, label, margin=self.configs['margin_angular'])
+            loss_angular_sentiment = large_margin_cosine_loss(enc_cls_output, sentiment, margin=self.configs['margin_angular'])
+            loss_angular = self.configs['alpha'] * loss_angular_lonely + (1 - self.configs['alpha']) * loss_angular_sentiment
+        else:
+            loss_angular = torch.zeros(1, device=device)
 
         # ******************Constrastive Loss***********************
-        loss_constrast = constrast_loss(cls_output, label, margin=self.configs['margin_constrast'])
+        if 'loss_contrast' in self.configs['loss']:
+            loss_contrast_lonely = contrast_loss_encoder(enc_cls_output, label, margin=self.configs['margin_contrast'])
+            loss_contrast_sentiment = contrast_loss_encoder(enc_cls_output, sentiment, margin=self.configs['margin_contrast'])
+            loss_contrast_enc = self.configs['alpha'] * loss_contrast_lonely + (1 - self.configs['alpha']) * loss_contrast_sentiment
+            loss_contrast = loss_contrast_enc
 
         # ******************Reason Loss***********************
         # Add prompt to reason
@@ -135,6 +155,8 @@ class BertLonely(nn.Module):
 
         # Tokenize and encode the reason
         text_reason = self.tokenizer(reason, padding='max_length', truncation=True, return_tensors="pt").to(device)
+        # text_reason_feat = self.text_encoder(text_reason.input_ids, attention_mask=text_reason.attention_mask, return_dict=True, mode='text')
+        # reason_enc_cls_output = text_reason_feat.last_hidden_state[:, 0]
 
         # Prepare decoder input using prompt's last hidden state
         decoder_input_ids = text_reason.input_ids.clone()
@@ -149,15 +171,58 @@ class BertLonely(nn.Module):
                                     encoder_attention_mask=text.attention_mask,
                                     labels=decoder_targets,
                                     return_dict=True)
-        loss_reason = outputs.loss
-        return loss_lonely, loss_sentiment, loss_dice, loss_tversky, loss_center, loss_angular, loss_constrast, loss_reason, prob
+
+        # # Decoder CLS output
+        # dec_cls_output = outputs.hidden_states[-1][:, 0]
+
+        # LM Loss
+        if 'loss_reason' in self.configs['loss']:
+            loss_reason = outputs.loss
+        else:
+            loss_reason =  torch.zeros(1, device=self.configs['train_device'])
+
+        # # ******************Constrastive Loss***********************
+        # if 'loss_contrast' in self.configs['loss']:
+        #     loss_contrast_lonely = contrast_loss_encoder(enc_cls_output, label, margin=self.configs['margin_contrast'])
+        #     loss_contrast_sentiment = contrast_loss_encoder(enc_cls_output, sentiment, margin=self.configs['margin_contrast'])
+        #     loss_contrast_enc = self.configs['alpha'] * loss_contrast_lonely + (1 - self.configs['alpha']) * loss_contrast_sentiment
+        #     loss_contrast = loss_contrast_enc
+        #     # loss_contrast_dec = contrast_loss_decoder(enc_cls_output, dec_cls_output, label, margin=self.configs['margin_contrast'])
+        #     # loss_contrast = loss_contrast_enc + loss_contrast_dec
+        # else:
+        #     loss_contrast =  torch.zeros(1, device=self.configs['train_device'])
+
+        # ******************Perplexity Loss***********************
+        if 'loss_perplex' in self.configs['loss']:
+            loss_perplex = perplex_loss(outputs.logits, decoder_targets)
+        else:
+            loss_perplex =  torch.zeros(1, device=self.configs['train_device'])
+
+        # ******************Embedding Match Loss***********************
+        if 'loss_embed_match' in self.configs['loss']:
+            loss_embed_match = embed_match_loss(dec_cls_output, reason_enc_cls_output)
+        else:
+            loss_embed_match =  torch.zeros(1, device=self.configs['train_device'])
+
+        # Return
+        return {
+            'loss_focal': loss_focal,
+            'loss_dice': loss_dice,
+            'loss_tversky': loss_tversky,
+            'loss_center': loss_center,
+            'loss_angular': loss_angular,
+            'loss_contrast': loss_contrast,
+            'loss_reason': loss_reason,
+            'loss_perplex': loss_perplex,
+            'loss_embed_match': loss_embed_match
+        }
 
     # Classify
     def classify(self, prompt, device):
         text = self.tokenizer(prompt, padding='max_length', truncation=True, return_tensors="pt").to(device)
         text_feat = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True, mode='text')
         cls_output = text_feat.last_hidden_state[:, 0]
-        logits_lonely = self.mlp(cls_output).squeeze(-1)
+        logits_lonely = self.mlp_lonely(cls_output).squeeze(-1)
         prob = torch.sigmoid(logits_lonely)
         return prob
 

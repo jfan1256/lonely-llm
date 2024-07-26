@@ -56,11 +56,32 @@ def large_margin_cosine_loss(output, label, margin=0.35, scale=30.0):
     loss = F.cross_entropy(output, label)
     return loss
 
-
-# Constrastive Loss (Analogous to Euclidean Constrastive Loss)
-def constrast_loss(features, labels, margin):
+# Contrastive Loss for Encoder (Analogous to Euclidean Contrastive Loss)
+def contrast_loss_encoder(features, labels, margin):
     embeddings_norm = F.normalize(features, p=2, dim=1)
     cos_sim = torch.mm(embeddings_norm, embeddings_norm.t())
     match_loss = 0.5 * labels * (1 - cos_sim) ** 2
     non_match_loss = 0.5 * (1 - labels) * F.relu(margin - (1 - cos_sim)) ** 2
     return torch.mean(match_loss + non_match_loss)
+
+# Contrastive Loss for Encoder and Decoder (Analogous to Euclidean Contrastive Loss)
+def contrast_loss_decoder(encoder_features, decoder_features, labels, margin):
+    enc_norm = F.normalize(encoder_features, p=2, dim=1)
+    dec_norm = F.normalize(decoder_features, p=2, dim=1)
+    cos_sim = torch.mm(enc_norm, dec_norm.t())
+    match_loss = 0.5 * labels * (1 - cos_sim) ** 2
+    non_match_loss = 0.5 * (1 - labels) * F.relu(margin - (1 - cos_sim)) ** 2
+    return torch.mean(match_loss + non_match_loss)
+
+# Perplexity Loss
+def perplex_loss(logits, targets):
+    ce_loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
+    perplexity = torch.exp(ce_loss)
+    return perplexity
+
+# Embedding Match Loss
+def embed_match_loss(output_embeddings, target_embeddings):
+    output_norm = F.normalize(output_embeddings, p=2, dim=1)
+    target_norm = F.normalize(target_embeddings, p=2, dim=1)
+    cos_sim = torch.sum(output_norm * target_norm, dim=1)
+    return 1 - cos_sim.mean()
