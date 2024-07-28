@@ -27,8 +27,8 @@ def plot_diagnostics(loss_data):
         axes = [axes]
 
     for idx, loss_name in enumerate(loss_data['train'].keys()):
-        train_losses = np.array(loss_data['train'][loss_name])
-        val_losses = np.array(loss_data['val'][loss_name])
+        train_losses = np.array([float(x) for x in loss_data['train'][loss_name]])
+        val_losses = np.array([float(x) for x in loss_data['val'][loss_name]])
 
         # Prepare data for gradient plot
         x_train = np.arange(len(train_losses))

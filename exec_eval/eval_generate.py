@@ -14,7 +14,7 @@ from utils.print import print_header
 from class_models.utils import set_seed
 from utils.system import get_configs
 from class_models.bert_lonely_1 import init_bert_lonely
-from class_dataloader.dataloader_reddit_lonely import RedditLonelyTrain
+from class_dataloader.dataloader import Train
 
 if __name__ == '__main__':
     # Set seed
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     # Initialize dataloader
     print_header("Initialize Dataloader")
     test_data = pd.read_csv(configs['test_path'])
-    dataset = RedditLonelyTrain(data=test_data)
+    dataset = Train(data=test_data)
     dataloader = DataLoader(dataset, batch_size=32, shuffle=False, drop_last=False)
 
     # Evaluate

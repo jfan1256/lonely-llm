@@ -1,11 +1,9 @@
 import torch
-import torch.nn.functional as F
 
 from torch import nn
-from transformers import AutoTokenizer,BertTokenizer
+from transformers import BertTokenizer
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-from utils.system import get_store_model
 from class_models.bert import BertConfig, BertModel, BertLMHeadModel
 from class_models.utils import load_checkpoint, tie_encoder_decoder_weights, set_trainable
 from class_models.loss import focal_loss, tversky_loss, dice_loss, center_loss, contrast_loss_encoder, large_margin_cosine_loss, contrast_loss_decoder, embed_match_loss, perplex_loss
@@ -86,9 +84,9 @@ class BertLonely(nn.Module):
         return sentiment_scores
 
     # Train
-    def forward(self, index, prompt, label, reason, sentiment, device):
-        # Get text embedding (analogous to prompt embedding)
-        text = self.tokenizer(prompt, padding='max_length', truncation=True, return_tensors="pt").to(device)
+    def forward(self, index, narrative, label, reason, sentiment, device):
+        # Get text embedding (analogous to narrative embedding)
+        text = self.tokenizer(narrative, padding='max_length', truncation=True, return_tensors="pt").to(device)
         text_feat = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True, mode='text')
         text_embed = text_feat.last_hidden_state
 
@@ -142,21 +140,12 @@ class BertLonely(nn.Module):
         else:
             loss_angular = torch.zeros(1, device=device)
 
-        # ******************Constrastive Loss***********************
-        if 'loss_contrast' in self.configs['loss']:
-            loss_contrast_lonely = contrast_loss_encoder(enc_cls_output, label, margin=self.configs['margin_contrast'])
-            loss_contrast_sentiment = contrast_loss_encoder(enc_cls_output, sentiment, margin=self.configs['margin_contrast'])
-            loss_contrast_enc = self.configs['alpha'] * loss_contrast_lonely + (1 - self.configs['alpha']) * loss_contrast_sentiment
-            loss_contrast = loss_contrast_enc
-
         # ******************Reason Loss***********************
         # Add prompt to reason
         reason = [self.configs['prompt'] + item for item in reason]
 
         # Tokenize and encode the reason
         text_reason = self.tokenizer(reason, padding='max_length', truncation=True, return_tensors="pt").to(device)
-        # text_reason_feat = self.text_encoder(text_reason.input_ids, attention_mask=text_reason.attention_mask, return_dict=True, mode='text')
-        # reason_enc_cls_output = text_reason_feat.last_hidden_state[:, 0]
 
         # Prepare decoder input using prompt's last hidden state
         decoder_input_ids = text_reason.input_ids.clone()
@@ -170,10 +159,13 @@ class BertLonely(nn.Module):
                                     encoder_hidden_states=text_embed,
                                     encoder_attention_mask=text.attention_mask,
                                     labels=decoder_targets,
-                                    return_dict=True)
+                                    return_dict=True,
+                                    output_attentions=True,
+                                    output_hidden_states=True,
+                                    )
 
-        # # Decoder CLS output
-        # dec_cls_output = outputs.hidden_states[-1][:, 0]
+        # Decoder CLS output
+        dec_cls_output = outputs.hidden_states[-1][:, 0]
 
         # LM Loss
         if 'loss_reason' in self.configs['loss']:
@@ -181,16 +173,16 @@ class BertLonely(nn.Module):
         else:
             loss_reason =  torch.zeros(1, device=self.configs['train_device'])
 
-        # # ******************Constrastive Loss***********************
-        # if 'loss_contrast' in self.configs['loss']:
-        #     loss_contrast_lonely = contrast_loss_encoder(enc_cls_output, label, margin=self.configs['margin_contrast'])
-        #     loss_contrast_sentiment = contrast_loss_encoder(enc_cls_output, sentiment, margin=self.configs['margin_contrast'])
-        #     loss_contrast_enc = self.configs['alpha'] * loss_contrast_lonely + (1 - self.configs['alpha']) * loss_contrast_sentiment
-        #     loss_contrast = loss_contrast_enc
-        #     # loss_contrast_dec = contrast_loss_decoder(enc_cls_output, dec_cls_output, label, margin=self.configs['margin_contrast'])
-        #     # loss_contrast = loss_contrast_enc + loss_contrast_dec
-        # else:
-        #     loss_contrast =  torch.zeros(1, device=self.configs['train_device'])
+        # ******************Constrastive Loss***********************
+        if 'loss_contrast' in self.configs['loss']:
+            loss_contrast_lonely = contrast_loss_encoder(enc_cls_output, label, margin=self.configs['margin_contrast'])
+            loss_contrast_sentiment = contrast_loss_encoder(enc_cls_output, sentiment, margin=self.configs['margin_contrast'])
+            loss_contrast_enc = self.configs['alpha'] * loss_contrast_lonely + (1 - self.configs['alpha']) * loss_contrast_sentiment
+            loss_contrast = loss_contrast_enc
+            # loss_contrast_dec = contrast_loss_decoder(enc_cls_output, dec_cls_output, label, margin=self.configs['margin_contrast'])
+            # loss_contrast = loss_contrast_enc + loss_contrast_dec
+        else:
+            loss_contrast =  torch.zeros(1, device=self.configs['train_device'])
 
         # ******************Perplexity Loss***********************
         if 'loss_perplex' in self.configs['loss']:
@@ -200,6 +192,8 @@ class BertLonely(nn.Module):
 
         # ******************Embedding Match Loss***********************
         if 'loss_embed_match' in self.configs['loss']:
+            text_reason_feat = self.text_encoder(text_reason.input_ids, attention_mask=text_reason.attention_mask, return_dict=True, mode='text')
+            reason_enc_cls_output = text_reason_feat.last_hidden_state[:, 0]
             loss_embed_match = embed_match_loss(dec_cls_output, reason_enc_cls_output)
         else:
             loss_embed_match =  torch.zeros(1, device=self.configs['train_device'])
@@ -218,8 +212,8 @@ class BertLonely(nn.Module):
         }
 
     # Classify
-    def classify(self, prompt, device):
-        text = self.tokenizer(prompt, padding='max_length', truncation=True, return_tensors="pt").to(device)
+    def classify(self, narrative, device):
+        text = self.tokenizer(narrative, padding='max_length', truncation=True, return_tensors="pt").to(device)
         text_feat = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True, mode='text')
         cls_output = text_feat.last_hidden_state[:, 0]
         logits_lonely = self.mlp_lonely(cls_output).squeeze(-1)

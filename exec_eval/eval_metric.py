@@ -15,7 +15,7 @@ from utils.print import print_header
 from class_models.utils import set_seed
 from utils.system import get_configs
 from class_models.bert_lonely import init_bert_lonely
-from class_dataloader.dataloader_reddit_lonely import RedditLonelyTrain
+from class_dataloader.dataloader import Train
 
 # Read evaluated checkpoints
 def read_evaluated_checkpoints(log_path):
@@ -58,8 +58,8 @@ if __name__ == '__main__':
     # Load in test data
     print_header("Initialize Dataloader")
     test_data = pd.read_csv(configs['test_path'])
-    dataset = RedditLonelyTrain(data=test_data)
-    dataloader = DataLoader(dataset, batch_size=32, shuffle=False, drop_last=False)
+    dataset = Train(data=test_data)
+    dataloader = DataLoader(dataset, batch_size=8, shuffle=False, drop_last=False)
 
     # Set checkpoints
     checkpoint_folder = configs['output_dir']
@@ -84,15 +84,15 @@ if __name__ == '__main__':
             loss_collect = {}
             label_collect = []
             with torch.no_grad():
-                for (index, prompt, label, reason) in tqdm(dataloader, desc='Evaluate'):
+                for (index, narrative, label, reason) in tqdm(dataloader, desc='Evaluate'):
                     # Get label and sentiment
                     label = torch.tensor(label, dtype=torch.float).to(current_configs['eval_device'])
-                    sentiment = model.get_sentiment(prompt)
+                    sentiment = model.get_sentiment(narrative)
                     sentiment = torch.tensor(sentiment, dtype=torch.float).to(current_configs['eval_device'])
 
                     # Get losses and probabilities
-                    results = model(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=current_configs['eval_device'])
-                    probs = model.classify(prompt=prompt, device=current_configs['eval_device']).detach().cpu().numpy().tolist()
+                    results = model(index=index, narrative=narrative, label=label, reason=reason, sentiment=sentiment, device=current_configs['eval_device'])
+                    probs = model.classify(narrative=narrative, device=current_configs['eval_device']).detach().cpu().numpy().tolist()
                     label_collect.extend(probs)
                     for key, value in results.items():
                         if key not in loss_collect:

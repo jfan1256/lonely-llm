@@ -29,12 +29,15 @@
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.2alpha1.25constrast'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_mlp512lonelysentiment0.2alpha0.75constrast'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best2.1gamma'
-output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_3loss'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_3loss'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_contrast'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_embed'
+output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_multiwd'
 
 # Data
-train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
-val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-val.csv'
-test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-test.csv'
+#train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
+#val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-val.csv'
+#test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-test.csv'
 #train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
 #val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
 #test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
@@ -44,6 +47,10 @@ test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed
 #train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/combine/combine_train.csv'
 #val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/combine/combine_val.csv'
 #test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/combine/combine_test.csv'
+train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/multiwd/process/train.csv'
+val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/multiwd/process/val.csv'
+test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/multiwd/process/test.csv'
+
 
 # Eval checkpoint
 eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/checkpoint_16.pth'

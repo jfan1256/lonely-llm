@@ -1,0 +1,36 @@
+#********************************************************************************PATH********************************************************************************
+# Output
+output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_multiwd'
+
+# Data
+pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/multiwd/process/train.csv'
+
+# Eval checkpoint
+eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/checkpoint_16.pth'
+
+# Bert Config
+bert_config: 'C:/Winston/MentalHealthResearch/mentalhealth/configs/model/bert_base.json'
+
+#********************************************************************************TRAIN********************************************************************************
+# Device
+device: 'cuda:1'
+
+# Param
+batch_size: 8
+max_epoch: 1000
+early_stop: 10
+
+# Optimizer
+weight_decay: 0.02
+init_lr: 0.0005
+min_lr: 0.000001
+warmup_lr: 0.000001
+lr_decay_rate: 0.9
+warmup_steps: 3000
+
+# Prompt
+prompt: ''
+
+#********************************************************************************MODEL********************************************************************************
+# Model Name
+model_name: 'bert-base-uncased'

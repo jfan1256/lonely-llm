@@ -1,6 +1,3 @@
-import warnings
-warnings.filterwarnings('ignore')
-
 import os
 import json
 import time
@@ -13,84 +10,79 @@ import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 from torch.utils.data import DataLoader
+from sklearn.model_selection import train_test_split
+from transformers import BertTokenizer, BertForMaskedLM
+from transformers import DataCollatorForLanguageModeling
 
-from utils.print import print_header
 from utils.system import get_configs
+from utils.print import print_header
 from class_models.utils import set_seed
 from exec_train.plot import plot_diagnostics
-from class_models.bert_lonely import init_bert_lonely
-from class_dataloader.dataloader_reddit_lonely import RedditLonelyTrain
-from class_models.metrics import MetricLogger, SmoothedValue, cosine_lr_schedule
+from class_dataloader.dataloader import Pretrain
+from class_models.metrics import MetricLogger, SmoothedValue, warmup_lr_schedule, step_lr_schedule
 
-# Update metrics
-def update_metrics(metric_logger, losses, update_global=True):
-    for key, value in losses.items():
-        if update_global:
-            metric_logger.update(**{key: value.item()})
 # Training Loop
 def train(epoch, model, dataloader, optimizer, configs):
-    # Set mode lt otrain
+    # Set model to train
     model.train()
 
     # Initialize MetricLogger
     metric_logger = MetricLogger(delimiter="  ")
-    loss_keys = ['loss_focal', 'loss_dice', 'loss_tversky', 'loss_center', 'loss_angular', 'loss_contrast', 'loss_reason', 'loss_perplex', 'loss_embed_match']
-    for key in loss_keys:
-        metric_logger.add_meter(key, SmoothedValue(window_size=50, fmt='{value:.8f}'))
-    metric_logger.add_meter('loss_total', SmoothedValue(window_size=50, fmt='{value:.8f}'))
-    metric_logger.add_meter('lr_bert', SmoothedValue(window_size=50, fmt='{value:.8f}'))
-    metric_logger.add_meter('lr_mlp', SmoothedValue(window_size=50, fmt='{value:.8f}'))
+    metric_logger.add_meter('loss_bert', SmoothedValue(window_size=50, fmt='{value:.8f}'))
+    metric_logger.add_meter('lr', SmoothedValue(window_size=50, fmt='{value:.8f}'))
     header = 'Train Epoch: [{}]'.format(epoch)
     print_freq = 50
 
-    # Train epoch
-    for i, (index, prompt, label, reason) in enumerate(metric_logger.log_every(dataloader, print_freq, header)):
-        # Get label and sentiment
-        label = torch.tensor(label, dtype=torch.float).to(configs['train_device'])
-        sentiment = model.get_sentiment(prompt)
-        sentiment = torch.tensor(sentiment, dtype=torch.float).to(configs['train_device'])
+    for step, (batch) in enumerate(metric_logger.log_every(dataloader, print_freq, header)):
+        # Warmup learning rate for first epoch
+        if epoch == 1:
+            warmup_lr_schedule(optimizer, step, configs['warmup_steps'], configs['warmup_lr'], configs['init_lr'])
+
+        # Get input and label
+        inputs = {key: value.to(configs['device']) for key, value in batch.items() if key != "labels"}
+        labels = batch['labels'].to(configs['device'])
 
         # Reset gradients
         optimizer.zero_grad()
 
         # Train model
-        losses = model(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=configs['train_device'])
-
-        # Total loss
-        loss = sum(loss for loss in losses.values())
+        outputs = model(**inputs, labels=labels)
+        loss = outputs.loss
 
         # Backward propagation
         loss.backward()
         optimizer.step()
 
-        # Update metrics
-        update_metrics(metric_logger, losses)
-        metric_logger.update(loss_total=loss, lr_bert=optimizer.param_groups[0]["lr"], lr_mlp=optimizer.param_groups[1]["lr"])
+        # Update metric logger
+        metric_logger.update(loss_bert=loss.item())
+        metric_logger.update(lr=optimizer.param_groups[0]["lr"])
 
-    # Return stats
+    # Gather the stats from all processes
     metric_logger.synchronize_between_processes()
     print("Averaged stats:", metric_logger.global_avg())
     return {k: "{:.8f}".format(meter.global_avg) for k, meter in metric_logger.meters.items()}
 
-# Evaluation loop
+# Evaluation Loop
 def eval(model, dataloader, configs):
+    # Set model to eval
     model.eval()
-    loss_keys = ['loss_focal', 'loss_dice', 'loss_tversky', 'loss_center', 'loss_angular', 'loss_contrast', 'loss_reason', 'loss_perplex', 'loss_embed_match']
-    accumulators = {key: [] for key in loss_keys}
 
+    # Create loss collectors
+    accumulators = {'loss_bert': []}
+
+    # Eval
     with torch.no_grad():
-        for (index, prompt, label, reason) in tqdm(dataloader, desc="Validating"):
-            # Get label and sentiment
-            label = torch.tensor(label, dtype=torch.float).to(configs['train_device'])
-            sentiment = model.get_sentiment(prompt)
-            sentiment = torch.tensor(sentiment, dtype=torch.float).to(configs['train_device'])
+        for batch in tqdm(dataloader, desc="Validating"):
+            # Get input and label
+            inputs = {key: value.to(configs['device']) for key, value in batch.items() if key != 'labels'}
+            labels = batch['labels'].to(configs['device'])
 
-            # Evaluate model
-            losses = model(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=configs['train_device'])
+            # Train model
+            outputs = model(**inputs, labels=labels)
+            loss = outputs.loss
 
             # Accumulate losses
-            for key in losses:
-                accumulators[key].append(losses[key].item())
+            accumulators['loss_bert'].append(loss.item())
 
     # Calculate average
     average_losses = {key: np.mean(values) for key, values in accumulators.items() if values}
@@ -100,29 +92,36 @@ def eval(model, dataloader, configs):
 def main(configs):
     # Initialize model
     print_header("Initialize Model")
-    bert_reddit_model = init_bert_lonely(pretrained=None, configs=configs)
-    model = bert_reddit_model.to(device=configs['train_device'])
+    tokenizer = BertTokenizer.from_pretrained(configs['model_name'])
+    model = BertForMaskedLM.from_pretrained(configs['model_name'])
+    model.to(configs['device'])
 
     # Initialize dataloader
     print_header("Initialize Dataloader")
-    train_data = pd.read_csv(configs['train_path'])
-    train_data = train_data.sample(frac=1, random_state=20050531).reset_index(drop=True)
-    val_data = pd.read_csv(configs['val_path'])
-    train_dataset = RedditLonelyTrain(data=train_data)
-    train_dataloader = DataLoader(train_dataset, batch_size=configs['batch_size'], shuffle=True, drop_last=True)
-    val_dataset = RedditLonelyTrain(data=val_data)
-    val_dataloader = DataLoader(val_dataset, batch_size=configs['batch_size'], shuffle=False, drop_last=False)
+
+    # Load data
+    data = pd.read_csv(configs['pretrain_path'])
+
+    # Shuffle data
+    data = data.sample(frac=1, random_state=20050531).reset_index(drop=True)
+
+    # Split data 80/20 train/val
+    train_data, val_data = train_test_split(data, test_size=0.2, random_state=20050531)
+    train_dataset = Pretrain(train_data, tokenizer)
+    val_dataset = Pretrain(val_data, tokenizer)
+
+    # MLM Dynamic Masking
+    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=True, mlm_probability=0.15)
+
+    # Create dataloaders
+    train_dataloader = DataLoader(train_dataset, batch_size=configs['batch_size'], shuffle=True, drop_last=True, collate_fn=data_collator)
+    val_dataloader = DataLoader(val_dataset, batch_size=configs['batch_size'], shuffle=False, collate_fn=data_collator)
 
     # Initialize optimizer
-    print_header("Initialize Optimizer")
-    encoder_decoder_params = list(model.text_encoder.parameters()) + list(model.text_decoder.parameters())
-    mlp_params = list(model.mlp_lonely.parameters()) + list(model.mlp_sentiment.parameters())
-    optimizer = torch.optim.AdamW([
-        {'params': encoder_decoder_params, 'lr': configs['bert_lr']},
-        {'params': mlp_params, 'lr': configs['mlp_lr']}
-    ], weight_decay=configs['weight_decay'])
+    print_header("Initialize optimizer")
+    optimizer = torch.optim.AdamW(params=model.parameters(), lr=configs['init_lr'], weight_decay=configs['weight_decay'])
 
-    # Load checkpoint
+    # Start epoch
     start_epoch = 0
 
     # Early stop params
@@ -141,8 +140,7 @@ def main(configs):
         print_header(f"Epoch {epoch}")
 
         # Step the learning rate
-        cosine_lr_schedule(optimizer, 0, epoch, configs['max_epoch'], configs['bert_lr'], configs['min_lr'])
-        cosine_lr_schedule(optimizer, 1, epoch, configs['max_epoch'], configs['mlp_lr'], configs['min_lr'])
+        step_lr_schedule(optimizer, epoch, configs['init_lr'], configs['min_lr'], configs['lr_decay_rate'])
 
         # Train model
         train_stats = train(epoch, model, train_dataloader, optimizer, configs)
@@ -150,7 +148,6 @@ def main(configs):
         # Eval model
         val_stats = eval(model, val_dataloader, configs)
         eval_loss = sum(val_stats.values())
-        val_stats['loss_total'] = eval_loss
 
         # Collect losses
         for key in val_stats.keys():
@@ -193,12 +190,12 @@ def main(configs):
     print('Training time {}'.format(total_time_str))
     return loss_collect
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Set seed
     set_seed(20050531)
 
     # Get configs
-    configs = yaml.load(open(get_configs() / 'train' / 'bert_lonely.yaml', 'r'), Loader=yaml.Loader)
+    configs = yaml.load(open(get_configs() / 'pretrain' / 'bert_lonely.yaml', 'r'), Loader=yaml.Loader)
 
     # Create output directory and save configs
     Path(configs['output_dir']).mkdir(parents=True, exist_ok=True)
