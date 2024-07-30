@@ -12,7 +12,7 @@ class Pretrain(Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        narrative = preprocess_text(self.data.iloc[index]['narrative'])
+        narrative = preprocess_text(self.data.iloc[index]['content'])
         inputs = self.tokenizer(narrative, truncation=True, padding='max_length', max_length=512)
         return inputs
 

@@ -34,10 +34,10 @@ class ReasonGPT:
                     "content": [
                         {
                             "type": "text",
-                            "text": f"Role: Psychiatrist\n"
-	                                f"Description: Label 1 indicates the narrative was written by a {self.subject} person; 0 indicates otherwise.\n"
-                                    f"Requirements: Adhere strictly to the label irrespective of the narrative content. Explain why the person is {self.subject} if the label is 1; if it is 0, explain why they are not.\n"
-                                    f"Task: Review the narrative and label below. Provide reasoning for the classification in all lowercase, with minimal punctuation, and avoid direct reference to the label.\n"
+                            "text": f"Role: {self.subject.capitalize()} Psychiatrist\n"
+	                                f"Description: The task involves assessing narratives that have been previously evaluated and labeled by professional {self.subject} psychiatrists. Each narrative is classified with a binary label: 1 indicates the narrative was authored by an individual experiencing {self.subject}, and 0 indicates the opposite.\n"
+                                    f"Requirement: Provide an explanation strictly based on the given label. Write the response entirely in lowercase, without referencing the label or classification process, and format it as a single paragraph.\n"
+                                    f"Task: Review the narrative and the provided label. Analyze and explain the classification by discussing context, specific examples from the narrative, and relevant psychological insights. Identify which aspects of the narrative are typical indicators of {self.subject} or non-{self.subject} and justify their relevance.\n"
                                     f"Narrative: {narrative}\n"''
                                     f"Label: {label}"
                         },
@@ -45,12 +45,13 @@ class ReasonGPT:
                 }
             ],
             temperature=0.75,
-            max_tokens=500,
+            max_tokens=1000,
             top_p=0.75,
             frequency_penalty=0,
             presence_penalty=0,
+            seed=1
         )
-        summary = response.choices[0].message.content.replace('\n', '').lower()
+        summary = response.choices[0].message.content.replace('\n', ' ').lower()
         return summary
 
     def _process_items(self, items):

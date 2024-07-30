@@ -212,4 +212,4 @@ if __name__ == '__main__':
     loss_data = main(configs)
 
     # Plot curves
-    plot_diagnostics(loss_data)
+    plot_diagnostics(loss_data, configs['output_dir'])

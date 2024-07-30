@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings('ignore')
+
 import os
 import json
 import time
@@ -118,7 +121,7 @@ def main(configs):
     val_dataloader = DataLoader(val_dataset, batch_size=configs['batch_size'], shuffle=False, collate_fn=data_collator)
 
     # Initialize optimizer
-    print_header("Initialize optimizer")
+    print_header("Initialize Optimizer")
     optimizer = torch.optim.AdamW(params=model.parameters(), lr=configs['init_lr'], weight_decay=configs['weight_decay'])
 
     # Start epoch
@@ -205,4 +208,4 @@ if __name__ == "__main__":
     loss_data = main(configs)
 
     # Plot curves
-    plot_diagnostics(loss_data)
+    plot_diagnostics(loss_data, configs['output_dir'])

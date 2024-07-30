@@ -20,9 +20,9 @@ def get_fold_colormap(fold, brighten=True):
         return base_colormaps[fold % len(base_colormaps)]
 
 # Plot Diagnostics
-def plot_diagnostics(loss_data):
+def plot_diagnostics(loss_data, output_dir):
     num_losses = len(loss_data['train'])
-    fig, axes = plt.subplots(num_losses, 1, figsize=(30, 5 * num_losses))
+    fig, axes = plt.subplots(num_losses, 1, figsize=(10, 5 * num_losses))
     if num_losses == 1:
         axes = [axes]
 
@@ -78,5 +78,7 @@ def plot_diagnostics(loss_data):
         patch_val = Patch(color=colormap_val(norm_val(y_val.min())), label=f'{loss_name.title()} Val')
         ax.legend(handles=[patch_train, patch_val], loc='upper right', fontsize=10)
 
+    # Save and show plot
     plt.tight_layout()
+    plt.savefig(f'{output_dir}/loss_curves.png')
     plt.show()
