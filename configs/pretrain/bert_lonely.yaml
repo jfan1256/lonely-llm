@@ -3,10 +3,13 @@
 output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_anxiety_corpus'
 
 # Data
-pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/corpus/ProcessedRedditRawData/Anxiety_submissions.csv'
+pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/corpus/ProcessedRedditRawData'
 
 # Bert Config
 bert_config: 'C:/Winston/MentalHealthResearch/mentalhealth/configs/model/bert_base.json'
+
+# Checkpoint
+train_checkpoint: ''
 
 #********************************************************************************TRAIN********************************************************************************
 # Num GPU
@@ -21,7 +24,7 @@ device: 'cuda'
 # Param
 batch_size: 16
 max_epoch: 100
-early_stop: 10
+early_stop: 5
 
 # Optimizer
 weight_decay: 0.02

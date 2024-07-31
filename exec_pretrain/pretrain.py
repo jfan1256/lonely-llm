@@ -117,10 +117,11 @@ def main(args, configs):
     model.to(configs['device'])
 
     # Initialize dataloader
-    print_header("Initialize Dataloader")
-
+    print_header("Load Data")
     # Load data
-    data = pd.read_csv(configs['pretrain_path'])
+    # data = pd.read_csv(configs['pretrain_path'])
+    all_files = [os.path.join(configs['pretrain_path'], file) for file in os.listdir(configs['pretrain_path']) if file.endswith('.csv')]
+    data = pd.concat((pd.read_csv(file) for file in tqdm(all_files, desc='Load Data')), ignore_index=True)
 
     # Shuffle data
     data = data.sample(frac=1, random_state=20050531).reset_index(drop=True)
@@ -131,6 +132,9 @@ def main(args, configs):
     # Create dataset
     train_dataset = Pretrain(train_data, tokenizer)
     val_dataset = Pretrain(val_data, tokenizer)
+
+    # Initialize dataloader
+    print_header("Initialize Dataloader")
 
     # MLM Dynamic Masking
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=True, mlm_probability=0.15)
@@ -150,21 +154,30 @@ def main(args, configs):
         val_dataloader = create_dataloader(datasets=[val_dataset], samplers=val_sampler, batch_size=[configs['batch_size']], num_workers=[4], is_trains=[False], collate_fns=[data_collator])[0]
     else:
         # Create dataloaders
-        train_dataloader = DataLoader(train_dataset, batch_size=configs['batch_size'], shuffle=True, drop_last=True, collate_fn=data_collator)
-        val_dataloader = DataLoader(val_dataset, batch_size=configs['batch_size'], shuffle=False, collate_fn=data_collator)
+        train_dataloader = DataLoader(train_dataset, batch_size=configs['batch_size'], num_workers=4, shuffle=True, drop_last=True, collate_fn=data_collator)
+        val_dataloader = DataLoader(val_dataset, batch_size=configs['batch_size'], num_workers=4, shuffle=False, collate_fn=data_collator)
 
     # Initialize optimizer
     print_header("Initialize Optimizer")
     optimizer = torch.optim.AdamW(params=model.parameters(), lr=configs['init_lr'], weight_decay=configs['weight_decay'])
 
+    # Start epoch
+    start_epoch = 0
+
+    # Load checkpoint model
+    if configs['train_checkpoint'] != '':
+        print_header("Load Checkpoint")
+        checkpoint = torch.load(configs['train_checkpoint'], map_location='cpu')
+        state_dict = checkpoint['model']
+        model.load_state_dict(state_dict)
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        start_epoch = checkpoint['epoch']
+
     # Store model without DDP for saving
     model_without_ddp = model
     if configs['num_gpu'] > 1:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=False)
         model_without_ddp = model.module
-
-    # Start epoch
-    start_epoch = 0
 
     # Early stop params
     patience = configs['early_stop']
@@ -182,7 +195,7 @@ def main(args, configs):
         print_header(f"Epoch {epoch}")
 
         # Step the learning rate
-        step_lr_schedule(optimizer, epoch, configs['init_lr'], configs['min_lr'], configs['lr_decay_rate'])
+        step_lr_schedule(optimizer, epoch - 1, configs['init_lr'], configs['min_lr'], configs['lr_decay_rate'])
 
         # Train model
         train_stats = train(epoch, model, train_dataloader, optimizer, configs)

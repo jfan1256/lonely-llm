@@ -56,16 +56,23 @@ test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed
 #val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/multiwd/process/val.csv'
 #test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/multiwd/process/test.csv'
 
-# Eval checkpoint
+# Checkpoint
+train_checkpoint: ''
 eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/checkpoint_16.pth'
 
 # Bert Config
 bert_config: 'C:/Winston/MentalHealthResearch/mentalhealth/configs/model/bert_base.json'
 
 #********************************************************************************TRAIN********************************************************************************
+# Num GPU
+num_gpu: 1
+
+# Distributed training
+package: 'gloo'
+
 # Device
-train_device: 'cuda:0'
-eval_device: 'cuda:0'
+train_device: 'cuda'
+eval_device: 'cuda:1'
 
 # Param
 batch_size: 8

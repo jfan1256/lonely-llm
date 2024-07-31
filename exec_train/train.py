@@ -2,13 +2,17 @@ import warnings
 warnings.filterwarnings('ignore')
 
 import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 import json
 import time
 import yaml
 import torch
+import argparse
 import datetime
 import numpy as np
 import pandas as pd
+import torch.distributed as dist
 import torch.backends.cudnn as cudnn
 
 from tqdm import tqdm
@@ -21,17 +25,19 @@ from class_models.model_utils import set_seed
 from class_dataloader.dataloader import Train
 from class_models.plot import plot_diagnostics
 from class_models.bert_lonely import init_bert_lonely
+from class_dataloader.utils import create_dataloader, create_sampler
 from class_models.train_utils import MetricLogger, SmoothedValue, cosine_lr_schedule
+from class_models.train_utils import init_distributed_mode, get_rank, get_world_size, is_main_process
 
-# Update metrics
-def update_metrics(metric_logger, losses, update_global=True):
-    for key, value in losses.items():
-        if update_global:
-            metric_logger.update(**{key: value.item()})
+
 # Training Loop
 def train(epoch, model, dataloader, optimizer, configs):
     # Set model to train
     model.train()
+
+    # Set dataloader to a new random sample
+    if configs['num_gpu'] > 1:
+        dataloader.sampler.set_epoch(epoch)
 
     # Initialize MetricLogger
     metric_logger = MetricLogger(delimiter="  ")
@@ -65,7 +71,8 @@ def train(epoch, model, dataloader, optimizer, configs):
         optimizer.step()
 
         # Update metrics
-        update_metrics(metric_logger, losses)
+        for key, value in losses.items():
+            metric_logger.update(**{key: value.item()})
         metric_logger.update(loss_total=loss, lr_bert=optimizer.param_groups[0]["lr"], lr_mlp=optimizer.param_groups[1]["lr"])
 
     # Return stats
@@ -102,7 +109,12 @@ def eval(model, dataloader, configs):
     return average_losses
 
 # Main
-def main(configs):
+def main(args, configs):
+    # Initialize multi-gpu distributed process
+    if configs['num_gpu'] > 1:
+        print_header("Initialize Distributed Mode")
+        init_distributed_mode(args)
+
     # Initialize model
     print_header("Initialize Model")
     bert_reddit_model = init_bert_lonely(pretrained=None, configs=configs)
@@ -110,13 +122,34 @@ def main(configs):
 
     # Initialize dataloader
     print_header("Initialize Dataloader")
+    # Load data
     train_data = pd.read_csv(configs['train_path'])
-    train_data = train_data.sample(frac=1, random_state=20050531).reset_index(drop=True)
     val_data = pd.read_csv(configs['val_path'])
+
+    # Shuffle data
+    train_data = train_data.sample(frac=1, random_state=20050531).reset_index(drop=True)
+
+    # Create dataset
     train_dataset = Train(data=train_data)
-    train_dataloader = DataLoader(train_dataset, batch_size=configs['batch_size'], shuffle=True, drop_last=True)
     val_dataset = Train(data=val_data)
-    val_dataloader = DataLoader(val_dataset, batch_size=configs['batch_size'], shuffle=False, drop_last=False)
+
+    # Data setup
+    if configs['num_gpu'] > 1:
+        # Create sampler
+        num_tasks = get_world_size()
+        global_rank = get_rank()
+
+        # Create samplers for Distributed Data Parallelism
+        train_sampler = create_sampler(datasets=[train_dataset], shuffles=[True], num_tasks=num_tasks, global_rank=global_rank)
+        val_sampler = create_sampler(datasets=[val_dataset], shuffles=[False], num_tasks=num_tasks, global_rank=global_rank)
+
+        # Create dataloaders
+        train_dataloader = create_dataloader(datasets=[train_dataset], samplers=train_sampler, batch_size=[configs['batch_size']], num_workers=[4], is_trains=[True], collate_fns=[None])[0]
+        val_dataloader = create_dataloader(datasets=[val_dataset], samplers=val_sampler, batch_size=[configs['batch_size']], num_workers=[4], is_trains=[False], collate_fns=[None])[0]
+    else:
+        # Create dataloaders
+        train_dataloader = DataLoader(train_dataset, batch_size=configs['batch_size'], num_workers=4, shuffle=True, drop_last=True)
+        val_dataloader = DataLoader(val_dataset, batch_size=configs['batch_size'], num_workers=4, shuffle=False, drop_last=False)
 
     # Initialize optimizer
     print_header("Initialize Optimizer")
@@ -129,6 +162,21 @@ def main(configs):
 
     # Start epoch
     start_epoch = 0
+
+    # Load checkpoint model
+    if configs['train_checkpoint'] != '':
+        print_header("Load Checkpoint")
+        checkpoint = torch.load(configs['train_checkpoint'], map_location='cpu')
+        state_dict = checkpoint['model']
+        model.load_state_dict(state_dict)
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        start_epoch = checkpoint['epoch']
+
+    # Store model without DDP for saving
+    model_without_ddp = model
+    if configs['num_gpu'] > 1:
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=False)
+        model_without_ddp = model.module
 
     # Early stop params
     patience = configs['early_stop']
@@ -146,51 +194,58 @@ def main(configs):
         print_header(f"Epoch {epoch}")
 
         # Step the learning rate
-        cosine_lr_schedule(optimizer, 0, epoch, configs['max_epoch'], configs['bert_lr'], configs['min_lr'])
-        cosine_lr_schedule(optimizer, 1, epoch, configs['max_epoch'], configs['mlp_lr'], configs['min_lr'])
+        cosine_lr_schedule(optimizer, 0, epoch - 1, configs['max_epoch'], configs['bert_lr'], configs['min_lr'])
+        cosine_lr_schedule(optimizer, 1, epoch - 1, configs['max_epoch'], configs['mlp_lr'], configs['min_lr'])
 
         # Train model
         train_stats = train(epoch, model, train_dataloader, optimizer, configs)
 
-        # Eval model
-        val_stats = eval(model, val_dataloader, configs)
-        eval_loss = sum(val_stats.values())
-        val_stats['loss_total'] = eval_loss
+        # Check main process (rank == 0)
+        if is_main_process():
+            # Eval model
+            val_stats = eval(model_without_ddp, val_dataloader, configs)
+            eval_loss = sum(val_stats.values())
+            val_stats['loss_total'] = eval_loss
 
-        # Collect losses
-        for key in val_stats.keys():
-            if key not in loss_collect['train']:
-                loss_collect['train'][key] = []
-            if key not in loss_collect['val']:
-                loss_collect['val'][key] = []
-            loss_collect['train'][key].append(train_stats[key])
-            loss_collect['val'][key].append(val_stats[key])
+            # Collect losses
+            for key in val_stats.keys():
+                if key not in loss_collect['train']:
+                    loss_collect['train'][key] = []
+                if key not in loss_collect['val']:
+                    loss_collect['val'][key] = []
+                loss_collect['train'][key].append(train_stats[key])
+                loss_collect['val'][key].append(val_stats[key])
 
-        # Log eval loss
-        loss_details = '  '.join([f"{name}: {value:.8f}" for name, value in val_stats.items()])
-        print(f"{loss_details}")
+            # Log eval loss
+            loss_details = '  '.join([f"{name}: {value:.8f}" for name, value in val_stats.items()])
+            print(f"{loss_details}")
 
-        # Check for improvement
-        if eval_loss < best_loss:
-            best_loss = eval_loss
-            epochs_without_improvement = 0
-            # Save the model as the best
-            save_obj = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'config': configs, 'epoch': epoch}
-            torch.save(save_obj, os.path.join(configs['output_dir'], 'best_checkpoint.pth'))
-        else:
-            epochs_without_improvement += 1
+            # Check for improvement
+            if eval_loss < best_loss:
+                best_loss = eval_loss
+                epochs_without_improvement = 0
+                # Save the model as the best
+                save_obj = {'model': model_without_ddp.state_dict(), 'optimizer': optimizer.state_dict(), 'config': configs, 'epoch': epoch}
+                torch.save(save_obj, os.path.join(configs['output_dir'], 'best_checkpoint.pth'))
+            else:
+                epochs_without_improvement += 1
 
-        # Early stopping check
-        if epochs_without_improvement >= patience:
-            print_header(f"Early stop at {epoch}")
-            break
+            # Early stopping check
+            if epochs_without_improvement >= patience:
+                print_header(f"Early stop at {epoch}")
+                break
 
-        # Save model and log results
-        save_obj = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'config': configs, 'epoch': epoch}
-        torch.save(save_obj, os.path.join(configs['output_dir'], 'checkpoint_%02d.pth' % epoch))
-        log_stats = {**{f'train_{k}': v for k, v in train_stats.items()}, **{f'val_{k}': "{:.8f}".format(v) for k, v in val_stats.items()}, 'epoch': epoch}
-        with open(os.path.join(configs['output_dir'], "log.txt"), "a") as f:
-            f.write(json.dumps(log_stats) + "\n")
+            # Save model and log results
+            save_obj = {'model': model_without_ddp.state_dict(), 'optimizer': optimizer.state_dict(), 'config': configs, 'epoch': epoch}
+            torch.save(save_obj, os.path.join(configs['output_dir'], 'checkpoint_%02d.pth' % epoch))
+            log_stats = {**{f'train_{k}': v for k, v in train_stats.items()}, **{f'val_{k}': "{:.8f}".format(v) for k, v in val_stats.items()}, 'epoch': epoch}
+            with open(os.path.join(configs['output_dir'], "log.txt"), "a") as f:
+                f.write(json.dumps(log_stats) + "\n")
+
+        # Synchronize multi-gpu
+        if configs['num_gpu'] > 1:
+            dist.barrier()
+            torch.cuda.empty_cache()
 
     # Calculate total time
     total_time = time.time() - start_time
@@ -208,12 +263,26 @@ if __name__ == '__main__':
     # Get configs
     configs = yaml.load(open(get_configs() / 'train' / 'bert_lonely.yaml', 'r'), Loader=yaml.Loader)
 
+    # Parse configs
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--world_size', help='Number of distributed processes (analogous to number of gpus)')
+    parser.add_argument('--dist_url', help='URL used to set up distributed training')
+    parser.add_argument('--distributed', help='Distributed or not')
+    parser.add_argument('--package', help='Distributed package name')
+    args = parser.parse_args()
+
+    # Set package
+    args.package = configs['package']
+    if args.package == 'gloo':
+        os.environ['MASTER_ADDR'] = '127.0.0.1'
+        os.environ['MASTER_PORT'] = '29500'
+
     # Create output directory and save configs
     Path(configs['output_dir']).mkdir(parents=True, exist_ok=True)
     yaml.dump(configs, open(os.path.join(configs['output_dir'], 'configs.yaml'), 'w'))
 
     # Execute main
-    loss_data = main(configs)
+    loss_data = main(args, configs)
 
     # Plot curves
     plot_diagnostics(loss_data, configs['output_dir'])
