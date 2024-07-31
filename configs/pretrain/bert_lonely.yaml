@@ -22,7 +22,7 @@ package: 'gloo'
 device: 'cuda'
 
 # Param
-batch_size: 16
+batch_size: 64
 max_epoch: 100
 early_stop: 5
 
