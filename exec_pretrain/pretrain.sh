@@ -1,1 +1,1 @@
-python -m torch.distributed.run --nproc_per_node=2 pretrain.py
+python -m torch.distributed.run --nproc_per_node=4 pretrain.py
