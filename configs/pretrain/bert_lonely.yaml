@@ -16,7 +16,7 @@ train_checkpoint: ''
 num_gpu: 2
 
 # Distributed training
-package: 'gloo'
+package: 'nccl'
 
 # Device
 device: 'cuda'
