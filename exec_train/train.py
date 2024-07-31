@@ -9,6 +9,7 @@ import torch
 import datetime
 import numpy as np
 import pandas as pd
+import torch.backends.cudnn as cudnn
 
 from tqdm import tqdm
 from pathlib import Path
@@ -16,11 +17,11 @@ from torch.utils.data import DataLoader
 
 from utils.print import print_header
 from utils.system import get_configs
-from class_models.utils import set_seed
-from exec_train.plot import plot_diagnostics
-from class_models.bert_lonely import init_bert_lonely
+from class_models.model_utils import set_seed
 from class_dataloader.dataloader import Train
-from class_models.metrics import MetricLogger, SmoothedValue, cosine_lr_schedule
+from class_models.plot import plot_diagnostics
+from class_models.bert_lonely import init_bert_lonely
+from class_models.train_utils import MetricLogger, SmoothedValue, cosine_lr_schedule
 
 # Update metrics
 def update_metrics(metric_logger, losses, update_global=True):
@@ -200,6 +201,9 @@ def main(configs):
 if __name__ == '__main__':
     # Set seed
     set_seed(20050531)
+
+    # Use most efficient algorithm
+    cudnn.benchmark = True
 
     # Get configs
     configs = yaml.load(open(get_configs() / 'train' / 'bert_lonely.yaml', 'r'), Loader=yaml.Loader)

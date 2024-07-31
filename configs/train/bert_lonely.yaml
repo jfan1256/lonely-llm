@@ -35,9 +35,9 @@
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_gpt4o'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_no_decoder'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_question'
-#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_test'
+output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_test'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_bert_base'
-output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_anxiety_corpus'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_anxiety_corpus'
 
 # Data
 train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
@@ -83,8 +83,8 @@ prompt: ''
 
 #********************************************************************************MODEL********************************************************************************
 # Model Name
-#bert_model: 'mental/mental-bert-base-uncased'
-bert_model: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_anxiety_corpus/checkpoint_03.pth'
+bert_model: 'mental/mental-bert-base-uncased'
+#bert_model: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_anxiety_corpus/checkpoint_03.pth'
 #bert_model: 'bert-base-uncased'
 
 # Loss

@@ -5,7 +5,7 @@ from transformers import BertTokenizer
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from class_models.bert import BertConfig, BertModel, BertLMHeadModel
-from class_models.utils import load_checkpoint, tie_encoder_decoder_weights, set_trainable
+from class_models.model_utils import load_checkpoint, tie_encoder_decoder_weights, set_trainable
 from class_models.loss import focal_loss, tversky_loss, dice_loss, center_loss, contrast_loss_encoder, large_margin_cosine_loss, contrast_loss_decoder, embed_match_loss, perplex_loss
 
 class BertLonely(nn.Module):

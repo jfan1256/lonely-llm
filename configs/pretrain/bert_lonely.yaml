@@ -9,8 +9,14 @@ pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/corpus/Process
 bert_config: 'C:/Winston/MentalHealthResearch/mentalhealth/configs/model/bert_base.json'
 
 #********************************************************************************TRAIN********************************************************************************
+# Num GPU
+num_gpu: 2
+
+# Distributed training
+package: 'gloo'
+
 # Device
-device: 'cuda:1'
+device: 'cuda'
 
 # Param
 batch_size: 16
@@ -27,4 +33,4 @@ warmup_steps: 3000
 
 #********************************************************************************MODEL********************************************************************************
 # Model Name
-model_name: 'bert-base-uncased'
+bert_model: 'bert-base-uncased'
