@@ -29,7 +29,6 @@ from class_dataloader.utils import create_dataloader, create_sampler
 from class_models.train_utils import MetricLogger, SmoothedValue, cosine_lr_schedule
 from class_models.train_utils import init_distributed_mode, get_rank, get_world_size, is_main_process
 
-
 # Training Loop
 def train(epoch, model, dataloader, optimizer, configs):
     # Set model to train

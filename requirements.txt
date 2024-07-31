@@ -1,0 +1,11 @@
+timm
+transformers
+fairscale
+opencv-python
+jupyterlab
+tensorflow
+matplotlib
+numpy
+pandas
+
+# conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
