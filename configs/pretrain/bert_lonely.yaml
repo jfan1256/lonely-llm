@@ -1,6 +1,6 @@
 #********************************************************************************PATH********************************************************************************
 # Output
-output_dir: '../store_model/bert_anxiety_corpus'
+output_dir: '../store_model/bert_corpus'
 
 # Data
 pretrain_path: '../data/corpus/ProcessedRedditRawData'
