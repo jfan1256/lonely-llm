@@ -1,38 +1,20 @@
+# Run this in command line for multi-gpu training on Argon HPC Cluster
+# qsub -pe smp 128 -q UI-GPU -l gpu=true -l gpu_a40=true job.sh
+
 #!/bin/bash
 
-#####Set Scheduler Configuration Directives#####
-# Name the job:
-#$ -N Mental Health-Data-Analysis
-
-# Send e-mail at beginning/end/suspension of job
+# Send Email at Beginning/End/Suspension of Job
 #$ -m bes
 
-# E-mail address to send to
+# Email address to send to
 #$ -M weiguo-fan@uiowa.edu
 
-# Start script in current working directory
-#$ -cwd
-
-#####Resource Selection Directives#####
-# Select the queue to run in
-#$ -q MANSCI-GPU -l gpu=true -l gpu_a40=true
-
-# Request four cores
-#$ -pe smp 64
-
-#####Execute Pretrain#####
-# CD into python env
+# Activate Python Environment
 cd /old_Users/weigfan/mentalbertenv/bin/
-
-# Activate python env
 source activate
 
-# Cd into exec_pretrain
+# CC into exec_pretrain
 cd /old_Users/weigfan/mental-health-research/lonely-llm/exec_pretrain
 
-# Unset gpu (allows it to recognize all gpus)
-unset CUDA_VISIBLE_DEVICES
-
-# Set up executable
-chmod +x pretrain.sh
-./pretrain.sh
+# Execute pretrain
+python -m torch.distributed.run --nproc_per_node=4 pretrain.py
