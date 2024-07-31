@@ -1,12 +1,12 @@
 #********************************************************************************PATH********************************************************************************
 # Output
-output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_anxiety_corpus'
+output_dir: '../store_model/bert_anxiety_corpus'
 
 # Data
-pretrain_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/corpus/ProcessedRedditRawData'
+pretrain_path: '../data/corpus/ProcessedRedditRawData'
 
 # Bert Config
-bert_config: 'C:/Winston/MentalHealthResearch/mentalhealth/configs/model/bert_base.json'
+bert_config: '../configs/model/bert_base.json'
 
 # Checkpoint
 train_checkpoint: ''
