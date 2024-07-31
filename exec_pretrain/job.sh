@@ -2,26 +2,26 @@
 
 #####Set Scheduler Configuration Directives#####
 # Name the job:
-$ -N Mental Health-Data-Analysis
+#$ -N Mental Health-Data-Analysis
 
 # Send e-mail at beginning/end/suspension of job
-$ -m bes
+#$ -m bes
 
 # E-mail address to send to
-$ -M weiguo-fan@uiowa.edu
+#$ -M weiguo-fan@uiowa.edu
 
 # Start script in current working directory
-$ -cwd
+#$ -cwd
 
 #####Resource Selection Directives#####
 # Select the queue to run in
-$ -q MANSCI-GPU -l gpu=true -l gpu_a40=true
+#$ -q MANSCI-GPU -l gpu=true -l gpu_a40=true
 
 # Request four cores
-$ -pe smp 64
+#$ -pe smp 64
 
 #####Execute Pretrain#####
-# Cd into python env
+# CD into python env
 cd /old_Users/weigfan/mentalbertenv/bin/
 
 # Activate python env
