@@ -18,20 +18,26 @@ class BertLonely(nn.Module):
         self.configs = configs
 
         # Tokenizer
-        self.tokenizer = BertTokenizer.from_pretrained(configs['model_name'])
-        self.tokenizer.add_special_tokens({'bos_token': '[DEC]'})
-        self.tokenizer.add_special_tokens({'additional_special_tokens': ['[ENC]']})
-        self.tokenizer.enc_token_id = self.tokenizer.additional_special_tokens_ids[0]
+        if configs['bert_model'] == 'mental/mental-bert-base-uncased':
+            self.tokenizer = BertTokenizer.from_pretrained(configs['bert_model'])
+            self.tokenizer.add_special_tokens({'bos_token': '[DEC]'})
+            self.tokenizer.add_special_tokens({'additional_special_tokens': ['[ENC]']})
+            self.tokenizer.enc_token_id = self.tokenizer.additional_special_tokens_ids[0]
+        else:
+            self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+            self.tokenizer.add_special_tokens({'bos_token': '[DEC]'})
+            self.tokenizer.add_special_tokens({'additional_special_tokens': ['[ENC]']})
+            self.tokenizer.enc_token_id = self.tokenizer.additional_special_tokens_ids[0]
 
         # Text Encoder
         bert_config = BertConfig.from_json_file(self.configs['bert_config'])
-        self.text_encoder = BertModel.from_pretrained(configs['model_name'], config=bert_config, add_pooling_layer=False, ignore_mismatched_sizes=True)
+        self.text_encoder = BertModel.from_pretrained(configs['bert_model'], config=bert_config, add_pooling_layer=False, ignore_mismatched_sizes=True)
         self.text_encoder.resize_token_embeddings(len(self.tokenizer))
         total = sum([param.nelement() for param in self.text_encoder.parameters()])
         print('Text Encoder Number of Params: %.2fM' % (total / 1e6))
 
         # Text Decoder
-        self.text_decoder = BertLMHeadModel.from_pretrained(configs['model_name'], config=bert_config)
+        self.text_decoder = BertLMHeadModel.from_pretrained(configs['bert_model'], config=bert_config)
         total = sum([param.nelement() for param in self.text_decoder.parameters()])
         self.text_decoder.resize_token_embeddings(len(self.tokenizer))
         print('Text Decoder Number of Params: %.2fM' % (total / 1e6))

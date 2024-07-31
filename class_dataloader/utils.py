@@ -2,6 +2,7 @@ import re
 import unicodedata
 
 def preprocess_text(text):
+    text = str(text)
     text = text.lower()
     text = re.sub(r'https?://\S+|www\.\S+', '', text)
     text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8', 'ignore')

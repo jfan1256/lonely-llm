@@ -10,12 +10,11 @@ bert_config: 'C:/Winston/MentalHealthResearch/mentalhealth/configs/model/bert_ba
 
 #********************************************************************************TRAIN********************************************************************************
 # Device
-device: 'cuda:0'
+device: 'cuda:1'
 
 # Param
-batch_size: 8
-#max_epoch: 100
-max_epoch: 2
+batch_size: 16
+max_epoch: 100
 early_stop: 10
 
 # Optimizer
@@ -25,9 +24,6 @@ min_lr: 0.000001
 warmup_lr: 0.000001
 lr_decay_rate: 0.9
 warmup_steps: 3000
-
-# Prompt
-prompt: ''
 
 #********************************************************************************MODEL********************************************************************************
 # Model Name

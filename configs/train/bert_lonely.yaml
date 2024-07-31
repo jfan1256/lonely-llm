@@ -34,25 +34,27 @@
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_embed'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_gpt4o'
 #output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_no_decoder'
-output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_gpt4o_improved'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_question'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_test'
+#output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_bert_base'
+output_dir: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_mental_best_anxiety_corpus'
 
 # Data
-#train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
-#val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-val.csv'
-#test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-test.csv'
+train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-train.csv'
+val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-val.csv'
+test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/processed_dreaddit-test.csv'
 #train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
 #val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
 #test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
-train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/dreaddit_train_gpt4o_improved.csv'
-val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/dreaddit_val_gpt4o_improved.csv'
-test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
+#train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/dreaddit_train_gpt4o_improved.csv'
+#val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/dreaddit_val_gpt4o_improved.csv'
+#test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
 #train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/combine/combine_train.csv'
 #val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/combine/combine_val.csv'
 #test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/combine/combine_test.csv'
 #train_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/multiwd/process/train.csv'
 #val_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/multiwd/process/val.csv'
 #test_path: 'C:/Winston/MentalHealthResearch/mentalhealth/data/multiwd/process/test.csv'
-
 
 # Eval checkpoint
 eval_checkpoint: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_lonely_train/checkpoint_16.pth'
@@ -63,12 +65,12 @@ bert_config: 'C:/Winston/MentalHealthResearch/mentalhealth/configs/model/bert_ba
 #********************************************************************************TRAIN********************************************************************************
 # Device
 train_device: 'cuda:0'
-eval_device: 'cuda:1'
+eval_device: 'cuda:0'
 
 # Param
 batch_size: 8
 max_epoch: 100
-early_stop: 10
+early_stop: 5
 
 # Optimizer
 bert_lr: 0.00001
@@ -81,8 +83,9 @@ prompt: ''
 
 #********************************************************************************MODEL********************************************************************************
 # Model Name
-model_name: 'mental/mental-bert-base-uncased'
-#model_name: 'bert-base-uncased'
+#bert_model: 'mental/mental-bert-base-uncased'
+bert_model: 'C:/Winston/MentalHealthResearch/mentalhealth/store_model/bert_anxiety_corpus/checkpoint_03.pth'
+#bert_model: 'bert-base-uncased'
 
 # Loss
 loss:
