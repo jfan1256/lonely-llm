@@ -147,11 +147,10 @@ def main(args, configs):
 
         # Create samplers for Distributed Data Parallelism
         train_sampler = create_sampler(datasets=[train_dataset], shuffles=[True], num_tasks=num_tasks, global_rank=global_rank)
-        val_sampler = create_sampler(datasets=[val_dataset], shuffles=[False], num_tasks=num_tasks, global_rank=global_rank)
 
         # Create dataloaders
         train_dataloader = create_dataloader(datasets=[train_dataset], samplers=train_sampler, batch_size=[configs['batch_size']], num_workers=[4], is_trains=[True], collate_fns=[data_collator])[0]
-        val_dataloader = create_dataloader(datasets=[val_dataset], samplers=val_sampler, batch_size=[configs['batch_size']], num_workers=[4], is_trains=[False], collate_fns=[data_collator])[0]
+        val_dataloader = DataLoader(val_dataset, batch_size=configs['batch_size'], num_workers=4, shuffle=False, collate_fn=data_collator)
     else:
         # Create dataloaders
         train_dataloader = DataLoader(train_dataset, batch_size=configs['batch_size'], num_workers=4, shuffle=True, drop_last=True, collate_fn=data_collator)

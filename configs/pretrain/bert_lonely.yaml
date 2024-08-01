@@ -9,7 +9,7 @@ pretrain_path: '../data/corpus/ProcessedRedditRawData'
 bert_config: '../configs/model/bert_base.json'
 
 # Checkpoint
-train_checkpoint: ''
+train_checkpoint: '../store_model/bert_corpus/checkpoint_01.pth'
 
 #********************************************************************************TRAIN********************************************************************************
 # Num GPU
