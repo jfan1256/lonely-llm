@@ -210,41 +210,41 @@ def main(args, configs):
             save_obj = {'model': model_without_ddp.state_dict(), 'optimizer': optimizer.state_dict(), 'config': configs, 'epoch': epoch}
             torch.save(save_obj, os.path.join(configs['output_dir'], 'checkpoint_%02d.pth' % epoch))
 
-            # Eval model
-            val_stats = eval(model_without_ddp, val_dataloader, configs)
-            eval_loss = sum(val_stats.values())
-
-            # Collect losses
-            for key in val_stats.keys():
-                if key not in loss_collect['train']:
-                    loss_collect['train'][key] = []
-                if key not in loss_collect['val']:
-                    loss_collect['val'][key] = []
-                loss_collect['train'][key].append(train_stats[key])
-                loss_collect['val'][key].append(val_stats[key])
-
-            # Log eval loss
-            loss_details = '  '.join([f"{name}: {value:.8f}" for name, value in val_stats.items()])
-            print(f"{loss_details}")
-
-            # Check for improvement and update best_checkpoint.pth
-            if eval_loss < best_loss:
-                best_loss = eval_loss
-                epochs_without_improvement = 0
-                save_obj = {'model': model_without_ddp.state_dict(), 'optimizer': optimizer.state_dict(), 'config': configs, 'epoch': epoch}
-                torch.save(save_obj, os.path.join(configs['output_dir'], 'best_checkpoint.pth'))
-            else:
-                epochs_without_improvement += 1
-
-            # Early stopping check
-            if epochs_without_improvement >= patience:
-                print_header(f"Early stop at {epoch}")
-                break
-
-            # Log stats
-            log_stats = {**{f'train_{k}': v for k, v in train_stats.items()}, **{f'val_{k}': "{:.8f}".format(v) for k, v in val_stats.items()}, 'epoch': epoch}
-            with open(os.path.join(configs['output_dir'], "log.txt"), "a") as f:
-                f.write(json.dumps(log_stats) + "\n")
+            # # Eval model
+            # val_stats = eval(model_without_ddp, val_dataloader, configs)
+            # eval_loss = sum(val_stats.values())
+            #
+            # # Collect losses
+            # for key in val_stats.keys():
+            #     if key not in loss_collect['train']:
+            #         loss_collect['train'][key] = []
+            #     if key not in loss_collect['val']:
+            #         loss_collect['val'][key] = []
+            #     loss_collect['train'][key].append(train_stats[key])
+            #     loss_collect['val'][key].append(val_stats[key])
+            #
+            # # Log eval loss
+            # loss_details = '  '.join([f"{name}: {value:.8f}" for name, value in val_stats.items()])
+            # print(f"{loss_details}")
+            #
+            # # Check for improvement and update best_checkpoint.pth
+            # if eval_loss < best_loss:
+            #     best_loss = eval_loss
+            #     epochs_without_improvement = 0
+            #     save_obj = {'model': model_without_ddp.state_dict(), 'optimizer': optimizer.state_dict(), 'config': configs, 'epoch': epoch}
+            #     torch.save(save_obj, os.path.join(configs['output_dir'], 'best_checkpoint.pth'))
+            # else:
+            #     epochs_without_improvement += 1
+            #
+            # # Early stopping check
+            # if epochs_without_improvement >= patience:
+            #     print_header(f"Early stop at {epoch}")
+            #     break
+            #
+            # # Log stats
+            # log_stats = {**{f'train_{k}': v for k, v in train_stats.items()}, **{f'val_{k}': "{:.8f}".format(v) for k, v in val_stats.items()}, 'epoch': epoch}
+            # with open(os.path.join(configs['output_dir'], "log.txt"), "a") as f:
+            #     f.write(json.dumps(log_stats) + "\n")
 
         # Synchronize multi-gpu
         if configs['num_gpu'] > 1:
