@@ -207,6 +207,10 @@ def main(args, configs):
 
         # Check main process (rank == 0)
         if is_main_process():
+            # Save model
+            save_obj = {'model': model_without_ddp.state_dict(), 'optimizer': optimizer.state_dict(), 'config': configs, 'epoch': epoch}
+            torch.save(save_obj, os.path.join(configs['output_dir'], 'checkpoint_%02d.pth' % epoch))
+
             # Eval model
             val_stats = eval(model_without_ddp, val_dataloader, configs)
             eval_loss = sum(val_stats.values())
@@ -238,9 +242,7 @@ def main(args, configs):
                 print_header(f"Early stop at {epoch}")
                 break
 
-            # Save model and log results
-            save_obj = {'model': model_without_ddp.state_dict(), 'optimizer': optimizer.state_dict(), 'config': configs, 'epoch': epoch}
-            torch.save(save_obj, os.path.join(configs['output_dir'], 'checkpoint_%02d.pth' % epoch))
+            # Log stats
             log_stats = {**{f'train_{k}': v for k, v in train_stats.items()}, **{f'val_{k}': "{:.8f}".format(v) for k, v in val_stats.items()}, 'epoch': epoch}
             with open(os.path.join(configs['output_dir'], "log.txt"), "a") as f:
                 f.write(json.dumps(log_stats) + "\n")
