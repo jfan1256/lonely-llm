@@ -200,6 +200,11 @@ def main(args, configs):
         # Train model
         train_stats = train(epoch, model, train_dataloader, optimizer, configs)
 
+        # Synchronize multi-gpu
+        if configs['num_gpu'] > 1:
+            dist.barrier()
+            torch.cuda.empty_cache()
+
         # Check main process (rank == 0)
         if is_main_process():
             # Eval model

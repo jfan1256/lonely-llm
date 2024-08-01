@@ -26,16 +26,18 @@ def process_dataframe(file_paths, output_file_paths):
         file_name = extract_filename(file_path)
         output_file_path = full_output_path / file_name
         dataframe = pd.read_csv(file_path)
-
+        print(file_path)
         # Handle test.csv
-        #if (file_name == "test.csv"):
-        #   dataframe[['post', 'question']] = dataframe['post'].apply(split_post_question)
+        if (file_name == "test.csv"):
+          dataframe.rename(columns={'query': 'narrative', 'gpt-3.5-turbo': 'reason'}, inplace=True)
 
         # Rename columns
         dataframe.rename(columns={'post': 'narrative', 'response': 'reason'}, inplace=True)
+        print(dataframe)
         dataframe['narrative'] = dataframe['narrative'].str.replace('^Post:', '', regex=True).str.strip()
 
-        dataframe = dataframe.drop('question', axis=1)
+        if (file_name != "test.csv"):
+            dataframe = dataframe.drop('question', axis=1)
 
         # Format label and reason
         dataframe['label'] = dataframe['reason'].apply(lambda x: 0 if pd.notna(x) and x.split('.')[0] == "no" else 1)

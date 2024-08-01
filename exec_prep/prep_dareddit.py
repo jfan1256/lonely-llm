@@ -1,61 +1,51 @@
-import warnings
-warnings.filterwarnings('ignore')
-
+import os
 import pandas as pd
 
 from utils.system import get_data
 
-# Specify the file path
-file_path = get_data() / "dreaddit" / "MentalLLaMA"
-# file_name = "dreaddit-train.csv"
-# file_name = "dreaddit-val.csv"
-file_name = "dreaddit-test.csv"
-full_file_path = file_path / file_name
-print("Full file path:", full_file_path)
+# Extract filenames from file path
+def extract_filename(file_path):
+    return os.path.basename(file_path)
 
-new_file_path = get_data() / "dreaddit" / "Processed"
-new_file_name = f"processed_{file_name}"
-full_new_file_path = new_file_path / new_file_name
+# Split post column in test.csv
+def split_post_question(row):
+    post_part, question_part = row.split('Question:', 1)
+    return pd.Series([post_part.strip(), question_part.strip()])
 
-# Load the CSV file into a DataFrame
-df = pd.read_csv(full_file_path)
+# Process dataframe for training
+def process_dataframe(file_paths, output_file_paths):
+    # Get file paths
+    base_path = get_data()
+    full_path = base_path / file_paths
+    full_output_path = base_path / output_file_paths
+    file_paths = list(full_path.glob('*.csv'))
 
-# Initialize empty lists to store the cleaned narratives, labels, and reasoning
-narratives = []
-labels = []
-reasons = []
+    # Iterate through file paths
+    for file_path in file_paths:
+        # Read in dataframe
+        file_name = extract_filename(file_path)
+        output_file_path = full_output_path / file_name
+        dataframe = pd.read_csv(file_path)
+        print(file_path)
+        # Handle test.csv
+        if (file_name == "test.csv"):
+          dataframe.rename(columns={'query': 'narrative', 'gpt-3.5-turbo': 'reason'}, inplace=True)
 
-for index, row in df.iterrows():
-    post_text = row['post']
-    response_text = row['response']
+        # Rename columns
+        dataframe.rename(columns={'post': 'narrative', 'response': 'reason'}, inplace=True)
+        print(dataframe)
+        dataframe['narrative'] = dataframe['narrative'].str.replace('^Post:', '', regex=True).str.strip()
 
-    # Remove the leading "Post:" and any text following "Question:" if present
-    post_start_index = post_text.find("Post: ") + len("Post: ") if "Post: " in post_text else 0
-    question_start_index = post_text.find(" Question:")
-    narrative = post_text[post_start_index:question_start_index if question_start_index != -1 else None].strip()
+        if (file_name != "test.csv"):
+            dataframe = dataframe.drop('question', axis=1)
 
-    # Extract label and reasoning from response_text
-    end_index = response_text.find(". Reasoning:")
-    if end_index != -1:
-        response = response_text[:end_index].strip()
-        label = 1 if response == "yes" else 0
-        reasoning_start_index = response_text.find(". Reasoning:") + len(". Reasoning:")
-        reasoning = response_text[reasoning_start_index:].strip()
-    else:
-        label = 0
-        reasoning = ""
+        # Format label and reason
+        dataframe['label'] = dataframe['reason'].apply(lambda x: 0 if pd.notna(x) and x.split('.')[0] == "no" else 1)
+        dataframe['reason'] = dataframe['reason'].str.replace(r'^(\s*no\s*\.|\s*yes\s*\.)\s*Reasoning:\s*', '', regex=True).str.strip()
 
-    # Append data to lists
-    narratives.append(narrative)
-    labels.append(label)
-    reasons.append(reasoning)
+        # Export
+        dataframe.to_csv(output_file_path, index=False)
 
-# Create a new dataframe from the lists
-new_df = pd.DataFrame({
-    'narrative': narratives,
-    'label': labels,
-    'reason': reasons
-})
-
-# Save the new dataframe to a CSV file
-new_df.to_csv(full_new_file_path, index=False)
+# Execute main
+if __name__ == "__main__":
+    process_dataframe("dreaddit/MentalLLaMA/", "dreaddit/Processed/")
