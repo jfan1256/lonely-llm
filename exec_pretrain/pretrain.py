@@ -127,7 +127,7 @@ def main(args, configs):
     data = data.sample(frac=1, random_state=20050531).reset_index(drop=True)
 
     # Split data 80/20 train/val
-    train_data, val_data = train_test_split(data, test_size=0.2, random_state=20050531)
+    train_data, val_data = train_test_split(data, test_size=0.1, random_state=20050531)
 
     # Create dataset
     train_dataset = Pretrain(train_data, tokenizer)
