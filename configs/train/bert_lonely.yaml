@@ -38,12 +38,13 @@
 #output_dir: '../store_model/bert_lonely_mental_best_test'
 #output_dir: '../store_model/bert_lonely_mental_best_bert_base'
 #output_dir: '../store_model/bert_lonely_mental_best_anxiety_corpus'
-output_dir: '../store_model/bert_lonely_mental_best_dr'
+#output_dir: '../store_model/bert_lonely_mental_best_dr'
+output_dir: '../store_model/bert_lonely_mental_best_2_corpus'
 
 # Data
-#train_path: '../data/dreaddit/Processed/processed_dreaddit-train.csv'
-#val_path: '../data/dreaddit/Processed/processed_dreaddit-val.csv'
-#test_path: '../data/dreaddit/Processed/processed_dreaddit-test.csv'
+train_path: '../data/dreaddit/Processed/processed_dreaddit-train.csv'
+val_path: '../data/dreaddit/Processed/processed_dreaddit-val.csv'
+test_path: '../data/dreaddit/Processed/processed_dreaddit-test.csv'
 #train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
 #val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
 #test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
@@ -56,9 +57,9 @@ output_dir: '../store_model/bert_lonely_mental_best_dr'
 #train_path: '../data/multiwd/process/train.csv'
 #val_path: '../data/multiwd/process/val.csv'
 #test_path: '../data/multiwd/process/test.csv'
-train_path: '../data/DR/process/train.csv'
-val_path: '../data/DR/process/val.csv'
-test_path: '../data/DR/process/test.csv'
+#train_path: '../data/DR/process/train.csv'
+#val_path: '../data/DR/process/val.csv'
+#test_path: '../data/DR/process/test.csv'
 
 # Checkpoint
 train_checkpoint: ''
@@ -94,8 +95,8 @@ prompt: ''
 
 #********************************************************************************MODEL********************************************************************************
 # Model Name
-bert_model: 'mental/mental-bert-base-uncased'
-#bert_model: '../store_model/bert_anxiety_corpus/checkpoint_03.pth'
+#bert_model: 'mental/mental-bert-base-uncased'
+bert_model: '../store_model/bert_corpus_checkpoint_02.pth'
 #bert_model: 'bert-base-uncased'
 
 # Loss
