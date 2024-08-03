@@ -7,11 +7,11 @@ from numba import jit
 from torch.utils.data import DataLoader
 
 # Get word count of dataset column
-@jit
+@jit(nopython=True)
 def fast_word_count(texts):
     counts = np.zeros(len(texts), dtype=np.int32)
-    for i, text in enumerate(texts):
-        text = str(text).strip()
+    for i in range(len(texts)):
+        text = str(texts[i]).strip()
         if text in ['', '.', ',', '!', '?']:
             counts[i] = 0
         else:
