@@ -3,7 +3,7 @@
 output_dir: '../store_model/bert_corpus_sent'
 
 # Data
-pretrain_path: '../data/corpus/ProcessedRedditRawData'
+pretrain_path: '../data/corpus/ProcessedRedditRawDataInSentence'
 
 # Bert Config
 bert_config: '../configs/model/bert_base.json'
@@ -13,7 +13,7 @@ train_checkpoint: ''
 
 #********************************************************************************TRAIN********************************************************************************
 # Num GPU
-num_gpu: 8
+num_gpu: 4
 
 # Distributed training
 package: 'nccl'
@@ -27,12 +27,9 @@ max_epoch: 100
 early_stop: 5
 
 # Optimizer
-#init_lr: 0.00005
-#min_lr: 0.000001
-#warmup_lr: 0.000001
-init_lr: 0.0001
-min_lr: 0.00001
-warmup_lr: 0.00001
+init_lr: 0.00003
+min_lr: 0.000001
+warmup_lr: 0.000001
 weight_decay: 0.02
 lr_decay_rate: 0.9
 warmup_steps: 3000
