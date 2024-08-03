@@ -27,7 +27,7 @@ from utils.print import print_header
 from class_models.model_utils import set_seed
 from class_models.plot import plot_diagnostics
 from class_dataloader.dataloader import Pretrain
-from class_dataloader.utils import create_dataloader, create_sampler
+from class_dataloader.utils import create_dataloader, create_sampler, fast_word_count
 from class_models.train_utils import init_distributed_mode, get_rank, get_world_size, is_main_process
 from class_models.train_utils import MetricLogger, SmoothedValue, warmup_lr_schedule, step_lr_schedule
 
@@ -122,6 +122,11 @@ def main(args, configs):
     # data = pd.read_csv(configs['pretrain_path'])
     all_files = [os.path.join(configs['pretrain_path'], file) for file in os.listdir(configs['pretrain_path']) if file.endswith('.csv')]
     data = pd.concat((pd.read_csv(file) for file in tqdm(all_files, desc='Load Data')), ignore_index=True)
+
+    # Filter word count (> 5 words)
+    data['word_count'] = fast_word_count(data['sentence'].values)
+    data = data.loc[data.word_count >= 5]
+    data = data[['sentence']]
 
     # Shuffle data
     data = data.sample(frac=1, random_state=20050531).reset_index(drop=True)

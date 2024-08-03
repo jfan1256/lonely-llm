@@ -1,8 +1,17 @@
 import re
+import jit
 import torch
 import unicodedata
-
+import numpy as np
 from torch.utils.data import DataLoader
+
+# Get word count of dataset column
+@jit
+def fast_word_count(texts):
+    counts = np.zeros(len(texts), dtype=np.int32)
+    for i, text in enumerate(texts):
+        counts[i] = len(text.split())
+    return counts
 
 # Preprocess text
 def preprocess_text(text):
