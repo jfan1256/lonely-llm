@@ -155,7 +155,7 @@ def main(args, configs):
 
         # Create dataloaders
         train_dataloader = create_dataloader(datasets=[train_dataset], samplers=train_sampler, batch_size=[configs['batch_size']], num_workers=[4], is_trains=[True], collate_fns=[data_collator])[0]
-        val_dataloader = DataLoader(val_dataset, batch_size=configs['batch_size'], num_workers=4, shuffle=False, collate_fn=data_collator)
+        # val_dataloader = DataLoader(val_dataset, batch_size=configs['batch_size'], num_workers=4, shuffle=False, collate_fn=data_collator)
     else:
         # Create dataloaders
         train_dataloader = DataLoader(train_dataset, batch_size=configs['batch_size'], num_workers=4, shuffle=True, drop_last=True, collate_fn=data_collator)

@@ -1,5 +1,5 @@
 # Run this in command line for multi-gpu training on Argon HPC Cluster
-# qsub -pe smp 128 -q UI-GPU -l gpu=true -l gpu_a40=true job.sh
+# qsub -pe smp 128 -q MANSCI-GPU -l gpu=true -l gpu_a40=true job.sh
 
 #!/bin/bash
 
