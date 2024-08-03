@@ -7,7 +7,6 @@ from numba import jit
 from torch.utils.data import DataLoader
 
 # Get word count of dataset column
-@jit
 def fast_word_count(texts):
     counts = np.zeros(len(texts), dtype=np.int32)
     for i in range(len(texts)):
