@@ -9,7 +9,7 @@ pretrain_path: '../data/corpus/ProcessedRedditRawData'
 bert_config: '../configs/model/bert_base.json'
 
 # Checkpoint
-train_checkpoint: '../store_model/bert_corpus/checkpoint_02.pth'
+train_checkpoint: ''
 
 #********************************************************************************TRAIN********************************************************************************
 # Num GPU
@@ -22,7 +22,7 @@ package: 'nccl'
 device: 'cuda'
 
 # Param
-batch_size: 32
+batch_size: 64
 max_epoch: 100
 early_stop: 5
 
