@@ -11,7 +11,11 @@ from torch.utils.data import DataLoader
 def fast_word_count(texts):
     counts = np.zeros(len(texts), dtype=np.int32)
     for i, text in enumerate(texts):
-        counts[i] = len(text.split())
+        text = str(text).strip()
+        if text in ['', '.', ',', '!', '?']:
+            counts[i] = 0
+        else:
+            counts[i] = len(text.split())
     return counts
 
 # Preprocess text
