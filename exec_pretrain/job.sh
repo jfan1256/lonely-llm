@@ -17,4 +17,4 @@ source activate
 cd /old_Users/weigfan/mental-health-research/lonely-llm/exec_pretrain
 
 # Execute pretrain
-python -m torch.distributed.run --nproc_per_node=4 pretrain.py
+python -m torch.distributed.run --nproc_per_node=8 pretrain.py
