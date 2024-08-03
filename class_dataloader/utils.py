@@ -1,8 +1,9 @@
 import re
-import jit
 import torch
 import unicodedata
 import numpy as np
+
+from numba import jit
 from torch.utils.data import DataLoader
 
 # Get word count of dataset column
