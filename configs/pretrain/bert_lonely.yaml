@@ -1,6 +1,6 @@
 #********************************************************************************PATH********************************************************************************
 # Output
-output_dir: '../store_model/bert_corpus'
+output_dir: '../store_model/bert_corpus_sent'
 
 # Data
 pretrain_path: '../data/corpus/ProcessedRedditRawData'
@@ -28,9 +28,12 @@ early_stop: 5
 
 # Optimizer
 weight_decay: 0.02
-init_lr: 0.00005
-min_lr: 0.000001
-warmup_lr: 0.000001
+#init_lr: 0.00005
+#min_lr: 0.000001
+#warmup_lr: 0.000001
+init_lr: 0.0001
+min_lr: 0.00001
+warmup_lr: 0.00001
 lr_decay_rate: 0.9
 warmup_steps: 3000
 
