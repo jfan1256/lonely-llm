@@ -12,10 +12,10 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score, precision_score, recall_score
 
 from utils.print import print_header
-from class_models.model_utils import set_seed
 from utils.system import get_configs
-from class_models.bert_lonely import init_bert_lonely
+from class_models.model_utils import set_seed
 from class_dataloader.dataloader import Train
+from class_models.bert_lonely import init_bert_lonely
 
 # Read evaluated checkpoints
 def read_evaluated_checkpoints(log_path):

@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 
 from torch import nn
 from transformers import BertTokenizer
@@ -32,7 +33,7 @@ class BertLonely(nn.Module):
         # Text Encoder
         bert_config = BertConfig.from_json_file(self.configs['bert_config'])
         self.text_encoder = BertModel.from_pretrained(configs['bert_model'], config=bert_config, add_pooling_layer=False, ignore_mismatched_sizes=True)
-        if configs['bert_model_checkpoint'] is not None:
+        if configs['bert_model_checkpoint'] is not '':
             checkpoint = torch.load(configs['bert_model_checkpoint'], map_location='cpu')
             model_state_dict = checkpoint['model']
             fixed_state_dict = {key.replace('bert.', ''): value for key, value in model_state_dict.items()}
@@ -43,7 +44,7 @@ class BertLonely(nn.Module):
 
         # Text Decoder
         self.text_decoder = BertLMHeadModel.from_pretrained(configs['bert_model'], config=bert_config)
-        if configs['bert_model_checkpoint'] is not None:
+        if configs['bert_model_checkpoint'] is not '':
             checkpoint = torch.load(configs['bert_model_checkpoint'], map_location='cpu')
             model_state_dict = checkpoint['model']
             self.text_decoder.load_state_dict(model_state_dict, strict=False)
@@ -113,14 +114,22 @@ class BertLonely(nn.Module):
         # Classify sentiment
         logits_sentiment = self.mlp_sentiment(enc_cls_output).squeeze(-1)
 
-        # ===============================================Binary Classification Loss (via MLP)===============================================
+        # ===============================================Loss (via MLP)===============================================
+        # ******************Binary Cross Entropy Loss***********************
+        if 'loss_bce' in self.configs['loss']:
+            loss_bce_lonely = F.binary_cross_entropy_with_logits(logits_lonely, label.float())
+            loss_bce_sentiment = F.binary_cross_entropy_with_logits(logits_sentiment, sentiment.float())
+            loss_bce = self.configs['alpha'] * loss_bce_lonely + (1 - self.configs['alpha']) * loss_bce_sentiment
+        else:
+            loss_bce = torch.zeros(1, device=device)
+
         # ******************Focal Loss***********************
         if 'loss_focal' in self.configs['loss']:
             loss_focal_lonely = focal_loss(logits_lonely, label, alpha=self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
             loss_focal_sentiment = focal_loss(logits_sentiment, sentiment, alpha=1-self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
             loss_focal = self.configs['alpha'] * loss_focal_lonely + (1 - self.configs['alpha']) * loss_focal_sentiment
         else:
-            loss_focal = torch.zeroes(1)
+            loss_focal = torch.zeros(1, device=device)
 
         # ******************Dice Loss***********************
         if 'loss_dice' in self.configs['loss']:
@@ -128,7 +137,7 @@ class BertLonely(nn.Module):
             loss_dice_sentiment = dice_loss(logits_sentiment, sentiment)
             loss_dice = self.configs['alpha'] * loss_dice_lonely + (1 - self.configs['alpha']) * loss_dice_sentiment
         else:
-            loss_dice = torch.zeroes(1)
+            loss_dice = torch.zeros(1, device=device)
 
         # ******************Tversky Loss***********************
         if 'loss_tversky' in self.configs['loss']:
@@ -136,7 +145,7 @@ class BertLonely(nn.Module):
             loss_tversky_sentiment = tversky_loss(logits_sentiment, sentiment, alpha=self.configs['alpha_tverksy'], beta=self.configs['beta_tversky'])
             loss_tversky = self.configs['alpha'] * loss_tversky_lonely + (1 - self.configs['alpha']) * loss_tversky_sentiment
         else:
-            loss_dice = torch.zeroes(1)
+            loss_tversky = torch.zeros(1, device=device)
 
         # ******************Center Loss***********************
         if 'loss_center' in self.configs['loss']:
@@ -185,7 +194,7 @@ class BertLonely(nn.Module):
         if 'loss_reason' in self.configs['loss']:
             loss_reason = outputs.loss
         else:
-            loss_reason =  torch.zeros(1, device=self.configs['train_device'])
+            loss_reason =  torch.zeros(1, device=device)
 
         # ******************Constrastive Loss***********************
         if 'loss_contrast' in self.configs['loss']:
@@ -196,13 +205,13 @@ class BertLonely(nn.Module):
             # loss_contrast_dec = contrast_loss_decoder(enc_cls_output, dec_cls_output, label, margin=self.configs['margin_contrast'])
             # loss_contrast = loss_contrast_enc + loss_contrast_dec
         else:
-            loss_contrast =  torch.zeros(1, device=self.configs['train_device'])
+            loss_contrast =  torch.zeros(1, device=device)
 
         # ******************Perplexity Loss***********************
         if 'loss_perplex' in self.configs['loss']:
             loss_perplex = perplex_loss(outputs.logits, decoder_targets)
         else:
-            loss_perplex =  torch.zeros(1, device=self.configs['train_device'])
+            loss_perplex =  torch.zeros(1, device=device)
 
         # ******************Embedding Match Loss***********************
         if 'loss_embed_match' in self.configs['loss']:
@@ -210,10 +219,11 @@ class BertLonely(nn.Module):
             reason_enc_cls_output = text_reason_feat.last_hidden_state[:, 0]
             loss_embed_match = embed_match_loss(dec_cls_output, reason_enc_cls_output)
         else:
-            loss_embed_match =  torch.zeros(1, device=self.configs['train_device'])
+            loss_embed_match =  torch.zeros(1, device=device)
 
         # Return
         return {
+            'loss_bce': loss_bce,
             'loss_focal': loss_focal,
             'loss_dice': loss_dice,
             'loss_tversky': loss_tversky,

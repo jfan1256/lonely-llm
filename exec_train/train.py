@@ -40,7 +40,7 @@ def train(epoch, model, dataloader, optimizer, configs):
 
     # Initialize MetricLogger
     metric_logger = MetricLogger(delimiter="  ")
-    loss_keys = ['loss_focal', 'loss_dice', 'loss_tversky', 'loss_center', 'loss_angular', 'loss_contrast', 'loss_reason', 'loss_perplex', 'loss_embed_match']
+    loss_keys = ['loss_bce', 'loss_focal', 'loss_dice', 'loss_tversky', 'loss_center', 'loss_angular', 'loss_contrast', 'loss_reason', 'loss_perplex', 'loss_embed_match']
     for key in loss_keys:
         metric_logger.add_meter(key, SmoothedValue(window_size=50, fmt='{value:.8f}'))
     metric_logger.add_meter('loss_total', SmoothedValue(window_size=50, fmt='{value:.8f}'))
@@ -85,7 +85,7 @@ def eval(model, dataloader, configs):
     model.eval()
 
     # Create loss collectors
-    loss_keys = ['loss_focal', 'loss_dice', 'loss_tversky', 'loss_center', 'loss_angular', 'loss_contrast', 'loss_reason', 'loss_perplex', 'loss_embed_match']
+    loss_keys = ['loss_bce', 'loss_focal', 'loss_dice', 'loss_tversky', 'loss_center', 'loss_angular', 'loss_contrast', 'loss_reason', 'loss_perplex', 'loss_embed_match']
     accumulators = {key: [] for key in loss_keys}
 
     # Eval

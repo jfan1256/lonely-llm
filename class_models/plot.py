@@ -43,7 +43,7 @@ def plot_diagnostics(loss_data, output_dir):
 
         # Set up the plot for training and validation loss
         ax = axes[idx]
-        ax.set_title(f'{loss_name.replace("_", " ").title()} Loss (Train vs. Val)', fontweight='bold', fontsize=14)
+        ax.set_title(f'{loss_name.replace("_", " ").title()} (Train vs. Val)', fontweight='bold', fontsize=14)
         ax.set_xlabel('Epochs', fontsize=12)
         ax.set_ylabel('Loss', fontsize=12)
 
