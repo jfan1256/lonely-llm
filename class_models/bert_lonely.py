@@ -32,12 +32,21 @@ class BertLonely(nn.Module):
         # Text Encoder
         bert_config = BertConfig.from_json_file(self.configs['bert_config'])
         self.text_encoder = BertModel.from_pretrained(configs['bert_model'], config=bert_config, add_pooling_layer=False, ignore_mismatched_sizes=True)
+        if configs['bert_model_checkpoint'] is not None:
+            checkpoint = torch.load(configs['bert_model_checkpoint'], map_location='cpu')
+            model_state_dict = checkpoint['model']
+            fixed_state_dict = {key.replace('bert.', ''): value for key, value in model_state_dict.items()}
+            self.text_encoder.load_state_dict(fixed_state_dict, strict=False)
         self.text_encoder.resize_token_embeddings(len(self.tokenizer))
         total = sum([param.nelement() for param in self.text_encoder.parameters()])
         print('Text Encoder Number of Params: %.2fM' % (total / 1e6))
 
         # Text Decoder
         self.text_decoder = BertLMHeadModel.from_pretrained(configs['bert_model'], config=bert_config)
+        if configs['bert_model_checkpoint'] is not None:
+            checkpoint = torch.load(configs['bert_model_checkpoint'], map_location='cpu')
+            model_state_dict = checkpoint['model']
+            self.text_decoder.load_state_dict(model_state_dict, strict=False)
         total = sum([param.nelement() for param in self.text_decoder.parameters()])
         self.text_decoder.resize_token_embeddings(len(self.tokenizer))
         print('Text Decoder Number of Params: %.2fM' % (total / 1e6))
