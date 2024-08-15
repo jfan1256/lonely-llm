@@ -3,7 +3,7 @@
 output_dir: '../store_model/bert_corpus_sent'
 
 # Data
-pretrain_path: '../data/corpus/ProcessedRedditRawDataInSentence'
+pretrain_path: '../data/corpus/ProcessedRedditRawData'
 
 # Bert Config
 bert_config: '../configs/model/bert_base.json'

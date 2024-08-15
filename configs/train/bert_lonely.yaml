@@ -16,12 +16,12 @@
 #********Sentence Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_sentence'
 #output_dir: '../paper_experiment/dreaddit/corpus_sentence_bert_mlp_sentence'
-output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_sentence'
+#output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_sentence'
 
 #******************************SAD******************************
 #********MLP Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_mlp'
-#output_dir: '../paper_experiment/sad/mental_bert_mlp'
+output_dir: '../paper_experiment/sad/mental_bert_mlp'
 #output_dir: '../paper_experiment/sad/base_bert_mlp'
 #********Best Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_best'
@@ -30,28 +30,18 @@ output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_sentence'
 #********Decoder Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_no_decoder'
 ##********Sentiment Comparison********
-#output_dir: '../paper_experiment/sad/corpus_bert_no_sentiment'
-
-#******************************Lonely******************************
-#********MLP Comparison********
-#output_dir: '../paper_experiment/lonely/corpus_bert_mlp'
-#output_dir: '../paper_experiment/lonely/mental_bert_mlp'
-#output_dir: '../paper_experiment/lonely/base_bert_mlp'
-#********Best Comparison********
-#output_dir: '../paper_experiment/lonely/corpus_bert_best'
-#output_dir: '../paper_experiment/lonely/base_bert_best'
-#output_dir: '../paper_experiment/lonely/mental_bert_best'
-#********Decoder Comparison********
-#output_dir: '../paper_experiment/lonely/corpus_bert_no_decoder'
+#output_dir: '../paper_experiment/sad/corpus_bert_mlp_sentence'
+#output_dir: '../paper_experiment/sad/corpus_sentence_bert_mlp_sentence'
+#output_dir: '../paper_experiment/sad/mental_bert_mlp_sentence'
 
 # Data
 #******************************Dreaddit******************************
 #train_path: '../data/dreaddit/Processed/processed_dreaddit-train.csv'
 #val_path: '../data/dreaddit/Processed/processed_dreaddit-val.csv'
 #test_path: '../data/dreaddit/Processed/processed_dreaddit-test.csv'
-train_path: '../data/dreaddit/Processed/dreaddit_train_gpt4o_improved.csv'
-val_path: '../data/dreaddit/Processed/dreaddit_val_gpt4o_improved.csv'
-test_path: '../data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
+#train_path: '../data/dreaddit/Processed/dreaddit_train_gpt4o_improved.csv'
+#val_path: '../data/dreaddit/Processed/dreaddit_val_gpt4o_improved.csv'
+#test_path: '../data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
 
 #******************************Lonely******************************
 #train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
@@ -62,6 +52,11 @@ test_path: '../data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
 #train_path: '../data/DR/process/train.csv'
 #val_path: '../data/DR/process/val.csv'
 #test_path: '../data/DR/process/test.csv'
+
+#******************************SAD******************************
+train_path: '../data/SAD/process/train.csv'
+val_path: '../data/SAD/process/val.csv'
+test_path: '../data/SAD/process/test.csv'
 
 # Checkpoint
 train_checkpoint: ''
@@ -95,10 +90,12 @@ min_lr: 0
 prompt: ''
 
 # Number of classes
-num_class: 2
+#num_class: 2
+num_class: 9
 
 # Embedding Type
-embed_type: 'sentence'
+embed_type: 'document'
+#embed_type: 'sentence'
 
 #********************************************************************************MODEL********************************************************************************
 # Model Name

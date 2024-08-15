@@ -10,10 +10,10 @@ from utils.system import get_configs
 from class_dataloader.utils import preprocess_text
 
 class ReasonGPT:
-    def __init__(self, data_path, output_path, subject):
+    def __init__(self, data_path, output_path, prompt):
         self.data_path = data_path
         self.output_path = output_path
-        self.subject = subject
+        self.prompt = prompt
         self.api_key = yaml.safe_load(open(get_configs() / 'api' / 'api.yaml'))['openai']
         self.client = OpenAI(api_key=self.api_key)
 
@@ -34,11 +34,14 @@ class ReasonGPT:
                     "content": [
                         {
                             "type": "text",
-                            "text": f"Role: {self.subject.capitalize()} Psychiatrist\n"
-	                                f"Description: The task involves assessing narratives that have been previously evaluated and labeled by professional {self.subject} psychiatrists. Each narrative is classified with a binary label: 1 indicates the narrative was authored by an individual experiencing {self.subject}, and 0 indicates the opposite.\n"
-                                    f"Requirement: Provide an explanation strictly based on the given label. Write the response entirely in lowercase, without referencing the label or classification process, and format it as a single paragraph.\n"
-                                    f"Task: Review the narrative and the provided label. Analyze and explain the classification by discussing context, specific examples from the narrative, and relevant psychological insights. Identify which aspects of the narrative are typical indicators of {self.subject} or non-{self.subject} and justify their relevance.\n"
-                                    f"Narrative: {narrative}\n"''
+                            # "text": f"Role: {self.prompt.capitalize()} Psychiatrist\n"
+	                        #         f"Description: The task involves assessing narratives that have been previously evaluated and labeled by professional {self.prompt} psychiatrists. Each narrative is classified with a binary label: 1 indicates the narrative was authored by an individual experiencing {self.prompt}, and 0 indicates the opposite.\n"
+                            #         f"Requirement: Provide an explanation strictly based on the given label. Write the response entirely in lowercase, without referencing the label or classification process, and format it as a single paragraph.\n"
+                            #         f"Task: Review the narrative and the provided label. Analyze and explain the classification by discussing context, specific examples from the narrative, and relevant psychological insights. Identify which aspects of the narrative are typical indicators of {self.prompt} or non-{self.prompt} and justify their relevance.\n"
+                            #         f"Narrative: {narrative}\n"
+                            #         f"Label: {label}"
+                            "text": f"{self.prompt}"
+                                    f"Narrative: {narrative}\n"
                                     f"Label: {label}"
                         },
                     ],

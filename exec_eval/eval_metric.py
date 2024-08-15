@@ -92,24 +92,31 @@ if __name__ == '__main__':
 
                     # Get losses and probabilities
                     results = model(index=index, narrative=narrative, label=label, reason=reason, sentiment=sentiment, device=current_configs['eval_device'])
-                    probs = model.classify(narrative=narrative, device=current_configs['eval_device']).detach().cpu().numpy().tolist()
-                    label_collect.extend(probs)
+                    probs = model.classify(narrative=narrative, num_class=current_configs['num_class'], device=current_configs['eval_device']).detach().cpu().numpy().tolist()
+                    if current_configs['num_class'] == 2:
+                        preds = (probs > 0.5).astype(int).tolist()
+                    else:
+                        preds = np.argmax(probs, axis=1).tolist()
+                    label_collect.extend(preds)
                     for key, value in results.items():
                         if key not in loss_collect:
                             loss_collect[key] = []
                         loss_collect[key].append(value.item())
 
             # Calculate F1
+            if current_configs['num_class'] == 2:
+                average_method = 'binary'
+            else:
+                average_method = 'macro'
             eval = pd.DataFrame({'pred_label': label_collect, 'true_label': test_data['label']})
-            eval['pred_label'] = np.where(eval['pred_label'] > 0.5, 1, 0)
-            f1 = f1_score(eval['true_label'], eval['pred_label'], average='binary')
+            f1 = f1_score(eval['true_label'], eval['pred_label'], average=average_method)
             if f1 > best_f1:
                 best_f1 = f1
                 best_model = file
 
             # Log stats
             loss_report = '  '.join(f"{key}: {np.mean(values):.4f}" for key, values in loss_collect.items())
-            metrics_report = f"F1 Score: {f1:.4f}  Precision: {precision_score(eval['true_label'], eval['pred_label'], average='binary'):.4f}  Recall: {recall_score(eval['true_label'], eval['pred_label'], average='binary'):.4f}"
+            metrics_report = f"F1 Score: {f1:.4f}  Precision: {precision_score(eval['true_label'], eval['pred_label'], average=average_method):.4f}  Recall: {recall_score(eval['true_label'], eval['pred_label'], average=average_method):.4f}"
             print(f"{file} --> {metrics_report}  {loss_report}", file=log_file, flush=True)
 
     # Print best model

@@ -67,7 +67,7 @@ def process_dataframe(file_paths, output_file_paths):
         # Format label and reason
         dataframe['label'] = dataframe['reason'].apply(lambda x: x[:x.find('.')] if '.' in x else x)
         # Determine category
-        dataframe['category'] = dataframe['label'].apply(determine_category)
+        dataframe['label'] = dataframe['label'].apply(determine_category)
         dataframe['reason'] = dataframe['reason'].apply(lambda x: x.split('Reasoning:', 1)[1] if 'Reasoning:' in x else '')
 
         print(dataframe)

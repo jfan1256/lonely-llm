@@ -278,12 +278,16 @@ class BertLonely(nn.Module):
         }
 
     # Classify
-    def classify(self, narrative, device):
+    def classify(self, narrative, num_class, device):
         text = self.tokenizer(narrative, padding='max_length', truncation=True, return_tensors="pt").to(device)
         text_feat = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True, mode='text')
         cls_output = text_feat.last_hidden_state[:, 0]
         logits_task = self.mlp_task(cls_output).squeeze(-1)
-        prob = torch.sigmoid(logits_task)
+
+        if num_class == 2:
+            prob = torch.sigmoid(logits_task)
+        elif num_class > 2:
+            prob = torch.nn.functional.softmax(logits_task, dim=-1)
         return prob
 
     # Generate
