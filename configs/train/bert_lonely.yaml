@@ -7,10 +7,10 @@
 #output_dir: '../paper_experiment/dreaddit/base_bert_mlp'
 #********Best Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_best'
-output_dir: '../paper_experiment/dreaddit/base_bert_best'
+#output_dir: '../paper_experiment/dreaddit/base_bert_best'
 #output_dir: '../paper_experiment/dreaddit/mental_bert_best'
 #********Decoder Comparison********
-#output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder'
+output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder'
 
 #******************************SAD******************************
 #********MLP Comparison********
@@ -86,12 +86,15 @@ min_lr: 0
 # Prompt
 prompt: ''
 
+# Number of classes
+num_class: 2
+
 #********************************************************************************MODEL********************************************************************************
 # Model Name
 #bert_model: 'mental/mental-bert-base-uncased'
 bert_model: 'bert-base-uncased'
-bert_model_checkpoint: ''
-#bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
+#bert_model_checkpoint: ''
+bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
 
 # Loss
 loss:
@@ -99,7 +102,7 @@ loss:
   - loss_dice
   - loss_tversky
   - loss_contrast
-  - loss_reason
+#  - loss_reason
 
 #********************************************************************************LOSS********************************************************************************
 # Alpha for loss allocation

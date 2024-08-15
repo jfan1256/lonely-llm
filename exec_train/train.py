@@ -40,7 +40,7 @@ def train(epoch, model, dataloader, optimizer, configs):
 
     # Initialize MetricLogger
     metric_logger = MetricLogger(delimiter="  ")
-    loss_keys = ['loss_bce', 'loss_focal', 'loss_dice', 'loss_tversky', 'loss_center', 'loss_angular', 'loss_contrast', 'loss_reason', 'loss_perplex', 'loss_embed_match']
+    loss_keys = ['loss_ce', 'loss_focal', 'loss_dice', 'loss_tversky', 'loss_center', 'loss_angular', 'loss_contrast', 'loss_reason', 'loss_perplex', 'loss_embed_match']
     for key in loss_keys:
         metric_logger.add_meter(key, SmoothedValue(window_size=50, fmt='{value:.8f}'))
     metric_logger.add_meter('loss_total', SmoothedValue(window_size=50, fmt='{value:.8f}'))
@@ -85,7 +85,7 @@ def eval(model, dataloader, configs):
     model.eval()
 
     # Create loss collectors
-    loss_keys = ['loss_bce', 'loss_focal', 'loss_dice', 'loss_tversky', 'loss_center', 'loss_angular', 'loss_contrast', 'loss_reason', 'loss_perplex', 'loss_embed_match']
+    loss_keys = ['loss_ce', 'loss_focal', 'loss_dice', 'loss_tversky', 'loss_center', 'loss_angular', 'loss_contrast', 'loss_reason', 'loss_perplex', 'loss_embed_match']
     accumulators = {key: [] for key in loss_keys}
 
     # Eval
@@ -152,8 +152,11 @@ def main(args, configs):
 
     # Initialize optimizer
     print_header("Initialize Optimizer")
-    encoder_decoder_params = list(model.text_encoder.parameters()) + list(model.text_decoder.parameters())
-    mlp_params = list(model.mlp_lonely.parameters()) + list(model.mlp_sentiment.parameters())
+    if 'loss_reason' in configs['loss'] or 'loss_perplex' in configs['loss'] or 'loss_embed_match' in configs['loss']:
+        encoder_decoder_params = list(model.text_encoder.parameters()) + list(model.text_decoder.parameters())
+    else:
+        encoder_decoder_params = list(model.text_encoder.parameters())
+    mlp_params = list(model.mlp_task.parameters()) + list(model.mlp_sentiment.parameters())
     optimizer = torch.optim.AdamW([
         {'params': encoder_decoder_params, 'lr': configs['bert_lr']},
         {'params': mlp_params, 'lr': configs['mlp_lr']}

@@ -1,11 +1,28 @@
 import torch
 import torch.nn.functional as F
 
+# Cross Entropy Loss
+def ce_loss(inputs, targets, num_class):
+    if num_class == 2:
+        loss_ce_task = F.binary_cross_entropy_with_logits(inputs, targets)
+        loss_ce = loss_ce_task
+    elif num_class > 2:
+        targets = targets.long()
+        loss_ce_task = F.cross_entropy(inputs, targets)
+        loss_ce = loss_ce_task
+    return loss_ce
+
 # Focal Loss
-def focal_loss(inputs, targets, alpha=0.7, gamma=2.0):
-    BCE_loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction='none')
-    pt = torch.exp(-BCE_loss)
-    F_loss = alpha * ((1 - pt) ** gamma) * BCE_loss
+def focal_loss(inputs, targets, num_class, alpha=0.7, gamma=2.0):
+    if num_class == 2:
+        BCE_loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction='none')
+        pt = torch.exp(-BCE_loss)
+        F_loss = alpha * ((1 - pt) ** gamma) * BCE_loss
+    elif num_class > 2:
+        targets = targets.long()
+        CE_loss = F.cross_entropy(inputs, targets, reduction='none')
+        pt = torch.exp(-CE_loss)
+        F_loss = alpha * ((1 - pt) ** gamma) * CE_loss
     return F_loss.mean()
 
 # Tversky Loss
