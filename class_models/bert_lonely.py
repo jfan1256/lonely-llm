@@ -1,3 +1,4 @@
+import re
 import torch
 
 from torch import nn
@@ -113,13 +114,43 @@ class BertLonely(nn.Module):
 
     # Train
     def forward(self, index, narrative, label, reason, sentiment, device):
-        # Get text embedding (analogous to narrative embedding)
-        text = self.tokenizer(narrative, padding='max_length', truncation=True, return_tensors="pt").to(device)
-        text_feat = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True, mode='text')
-        text_embed = text_feat.last_hidden_state
+        # Document embeddings
+        if self.configs['embed_type'] == 'document':
+            # Get text embedding (analogous to narrative embedding)
+            text = self.tokenizer(narrative, padding='max_length', truncation=True, return_tensors="pt").to(device)
+            text_feat = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True, mode='text')
+            text_embed = text_feat.last_hidden_state
 
-        # Extract the [CLS] token's final layer features
-        enc_cls_output = text_feat.last_hidden_state[:, 0]
+            # Extract the [CLS] token's final layer features
+            enc_cls_output = text_feat.last_hidden_state[:, 0]
+
+        # Sentence embeddings
+        elif self.configs['embed_type'] == 'sentence':
+            # Get text embedding per sentence per narrative and average across sentences per narrative
+            text_embed = []
+            enc_cls_output = []
+
+            # Iterate through narratives
+            for post in narrative:
+                sentences = [sentence.strip() for sentence in re.split(r'[.?!]', post) if sentence.strip()]
+                post_sent_embed = []
+                post_cls_output = []
+                # Iterate through sentences
+                for sentence in sentences:
+                    sent = self.tokenizer(sentence, padding='max_length', truncation=True, return_tensors="pt").to(device)
+                    sent_feat = self.text_encoder(sent.input_ids, attention_mask=sent.attention_mask, return_dict=True, mode='text')
+                    sent_embed = sent_feat.last_hidden_state
+                    sent_cls_output = sent_feat.last_hidden_state[:, 0]
+                    post_sent_embed.append(sent_embed)
+                    post_cls_output.append(sent_cls_output)
+                # Average across sentences
+                post_embed = torch.stack(post_sent_embed).mean(dim=0)
+                text_embed.append(post_embed)
+                post_cls_output = torch.stack(post_cls_output).mean(dim=0)
+                enc_cls_output.append(post_cls_output)
+            # Stack
+            text_embed = torch.stack(text_embed).squeeze(1)
+            enc_cls_output = torch.stack(enc_cls_output).squeeze(1)
 
         # Classify lonely
         logits_task = self.mlp_task(enc_cls_output).squeeze(-1)

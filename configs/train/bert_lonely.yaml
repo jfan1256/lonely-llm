@@ -3,7 +3,7 @@
 #******************************Dreaddit******************************
 #********MLP Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp'
-output_dir: '../paper_experiment/dreaddit/mental_bert_mlp'
+#output_dir: '../paper_experiment/dreaddit/mental_bert_mlp'
 #output_dir: '../paper_experiment/dreaddit/base_bert_mlp'
 #********Best Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_best'
@@ -13,6 +13,10 @@ output_dir: '../paper_experiment/dreaddit/mental_bert_mlp'
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder'
 #********Sentiment Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_no_sentiment'
+#********Sentence Comparison********
+#output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_sentence'
+#output_dir: '../paper_experiment/dreaddit/corpus_sentence_bert_mlp_sentence'
+output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_sentence'
 
 #******************************SAD******************************
 #********MLP Comparison********
@@ -79,7 +83,7 @@ eval_device: 'cuda:1'
 # Param
 batch_size: 8
 max_epoch: 100
-early_stop: 10
+early_stop: 5
 
 # Optimizer
 bert_lr: 0.00001
@@ -93,12 +97,16 @@ prompt: ''
 # Number of classes
 num_class: 2
 
+# Embedding Type
+embed_type: 'sentence'
+
 #********************************************************************************MODEL********************************************************************************
 # Model Name
 bert_model: 'mental/mental-bert-base-uncased'
 #bert_model: 'bert-base-uncased'
 bert_model_checkpoint: ''
 #bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
+#bert_model_checkpoint: '../store_model/bert_corpus_sent_checkpoint_03.pth'
 
 # Loss
 loss:
