@@ -138,23 +138,23 @@ class BertLonely(nn.Module):
         # ******************Focal Loss***********************
         if 'loss_focal' in self.configs['loss']:
             loss_focal_task = focal_loss(logits_task, label, num_class=self.configs['num_class'], alpha=self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
-            loss_focal_sentiment = focal_loss(logits_sentiment, sentiment, num_class=self.configs['num_class'], alpha=1-self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
+            loss_focal_sentiment = focal_loss(logits_sentiment, sentiment, num_class=2, alpha=1-self.configs['alpha_focal'], gamma=self.configs['gamma_focal'])
             loss_focal = self.configs['alpha'] * loss_focal_task + (1 - self.configs['alpha']) * loss_focal_sentiment
         else:
             loss_focal = torch.zeros(1, device=device)
 
         # ******************Dice Loss***********************
         if 'loss_dice' in self.configs['loss']:
-            loss_dice_task = dice_loss(logits_task, label)
-            loss_dice_sentiment = dice_loss(logits_sentiment, sentiment)
+            loss_dice_task = dice_loss(logits_task, label, num_class=self.configs['num_class'])
+            loss_dice_sentiment = dice_loss(logits_sentiment, sentiment, num_class=2)
             loss_dice = self.configs['alpha'] * loss_dice_task + (1 - self.configs['alpha']) * loss_dice_sentiment
         else:
             loss_dice = torch.zeros(1, device=device)
 
         # ******************Tversky Loss***********************
         if 'loss_tversky' in self.configs['loss']:
-            loss_tversky_task = tversky_loss(logits_task, label, alpha=self.configs['alpha_tverksy'], beta=self.configs['beta_tversky'])
-            loss_tversky_sentiment = tversky_loss(logits_sentiment, sentiment, alpha=self.configs['alpha_tverksy'], beta=self.configs['beta_tversky'])
+            loss_tversky_task = tversky_loss(logits_task, label, num_class=self.configs['num_class'], alpha=self.configs['alpha_tverksy'], beta=self.configs['beta_tversky'])
+            loss_tversky_sentiment = tversky_loss(logits_sentiment, sentiment, num_class=2, alpha=self.configs['alpha_tverksy'], beta=self.configs['beta_tversky'])
             loss_tversky = self.configs['alpha'] * loss_tversky_task + (1 - self.configs['alpha']) * loss_tversky_sentiment
         else:
             loss_tversky = torch.zeros(1, device=device)
@@ -211,8 +211,8 @@ class BertLonely(nn.Module):
 
         # ******************Constrastive Loss***********************
         if 'loss_contrast' in self.configs['loss']:
-            loss_contrast_task = contrast_loss_encoder(enc_cls_output, label, margin=self.configs['margin_contrast'])
-            loss_contrast_sentiment = contrast_loss_encoder(enc_cls_output, sentiment, margin=self.configs['margin_contrast'])
+            loss_contrast_task = contrast_loss_encoder(enc_cls_output, label, num_class=self.configs['num_class'], margin=self.configs['margin_contrast'])
+            loss_contrast_sentiment = contrast_loss_encoder(enc_cls_output, sentiment, num_class=2, margin=self.configs['margin_contrast'])
             loss_contrast_enc = self.configs['alpha'] * loss_contrast_task + (1 - self.configs['alpha']) * loss_contrast_sentiment
             loss_contrast = loss_contrast_enc
         else:

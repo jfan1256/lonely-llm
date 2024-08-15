@@ -26,21 +26,42 @@ def focal_loss(inputs, targets, num_class, alpha=0.7, gamma=2.0):
     return F_loss.mean()
 
 # Tversky Loss
-def tversky_loss(logits, true_labels, alpha=0.5, beta=0.5, smooth=1.0):
-    preds = torch.sigmoid(logits)
-    true_pos = torch.sum(preds * true_labels)
-    false_neg = torch.sum((1 - preds) * true_labels)
-    false_pos = torch.sum(preds * (1 - true_labels))
-    score = (true_pos + smooth) / (true_pos + alpha * false_neg + beta * false_pos + smooth)
-    return 1 - score
+def tversky_loss(logits, true_labels, num_class, alpha=0.5, beta=0.5, smooth=1.0):
+    if num_class == 2:
+        preds = torch.sigmoid(logits)
+        true_pos = torch.sum(preds * true_labels)
+        false_neg = torch.sum((1 - preds) * true_labels)
+        false_pos = torch.sum(preds * (1 - true_labels))
+        score = (true_pos + smooth) / (true_pos + alpha * false_neg + beta * false_pos + smooth)
+        return 1 - score
+    elif num_class > 2:
+        true_labels = true_labels.long()
+        num_classes = logits.shape[1]
+        preds = F.softmax(logits, dim=1)
+        true_labels = F.one_hot(true_labels, num_classes=num_classes)
+        true_pos = torch.sum(preds * true_labels, dim=0)
+        false_neg = torch.sum((1 - preds) * true_labels, dim=0)
+        false_pos = torch.sum(preds * (1 - true_labels), dim=0)
+        score = (true_pos + smooth) / (true_pos + alpha * false_neg + beta * false_pos + smooth)
+        return 1 - score.mean()
 
 # Dice Loss
-def dice_loss(logits, true_labels, smooth=1.0):
-    preds = torch.sigmoid(logits)
-    intersection = torch.sum(preds * true_labels, dim=0)
-    union = torch.sum(preds, dim=0) + torch.sum(true_labels, dim=0)
-    dice_score = (2. * intersection + smooth) / (union + smooth)
-    return 1 - dice_score
+def dice_loss(logits, true_labels, num_class, smooth=1.0):
+    if num_class == 2:
+        preds = torch.sigmoid(logits)
+        intersection = torch.sum(preds * true_labels, dim=0)
+        union = torch.sum(preds, dim=0) + torch.sum(true_labels, dim=0)
+        dice_score = (2. * intersection + smooth) / (union + smooth)
+        return 1 - dice_score
+    elif num_class > 2:
+        true_labels = true_labels.long()
+        num_classes = logits.shape[1]
+        preds = F.softmax(logits, dim=1)
+        true_labels = F.one_hot(true_labels, num_classes=num_classes)
+        intersection = torch.sum(preds * true_labels, dim=0)
+        union = torch.sum(preds, dim=0) + torch.sum(true_labels, dim=0)
+        dice_score = (2. * intersection + smooth) / (union + smooth)
+        return 1 - dice_score.mean()
 
 # Center Loss
 def center_loss(features, labels, centers, alpha):
@@ -74,12 +95,21 @@ def large_margin_cosine_loss(output, label, margin=0.35, scale=30.0):
     return loss
 
 # Contrastive Loss for Encoder (Analogous to Euclidean Contrastive Loss)
-def contrast_loss_encoder(features, labels, margin):
-    embeddings_norm = F.normalize(features, p=2, dim=1)
-    cos_sim = torch.mm(embeddings_norm, embeddings_norm.t())
-    match_loss = 0.5 * labels * (1 - cos_sim) ** 2
-    non_match_loss = 0.5 * (1 - labels) * F.relu(margin - (1 - cos_sim)) ** 2
-    return torch.mean(match_loss + non_match_loss)
+def contrast_loss_encoder(features, labels, num_class, margin):
+    if num_class == 2:
+        embeddings_norm = F.normalize(features, p=2, dim=1)
+        cos_sim = torch.mm(embeddings_norm, embeddings_norm.t())
+        match_loss = 0.5 * labels * (1 - cos_sim) ** 2
+        non_match_loss = 0.5 * (1 - labels) * F.relu(margin - (1 - cos_sim)) ** 2
+        return torch.mean(match_loss + non_match_loss)
+    elif num_class > 2:
+        embeddings_norm = F.normalize(features, p=2, dim=1)
+        cos_sim = torch.mm(embeddings_norm, embeddings_norm.t())
+        labels_eq = labels.unsqueeze(1) == labels.unsqueeze(0)
+        labels_eq = labels_eq.float()
+        match_loss = 0.5 * labels_eq * (1 - cos_sim) ** 2
+        non_match_loss = 0.5 * (1 - labels_eq) * F.relu(margin - (1 - cos_sim)) ** 2
+        return torch.mean(match_loss + non_match_loss)
 
 # Contrastive Loss for Encoder and Decoder (Analogous to Euclidean Contrastive Loss)
 def contrast_loss_decoder(encoder_features, decoder_features, labels, margin):
