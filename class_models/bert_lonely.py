@@ -59,12 +59,15 @@ class BertLonely(nn.Module):
             tie_encoder_decoder_weights(self.text_encoder, self.text_decoder.bert, '', '/attention')
 
         # Freeze parameters of the text_encoder and text_decoder to not train them
-        encoder_layers_to_train = ['encoder.layer.11.']
-        set_trainable(model_component=self.text_encoder, layer_names=encoder_layers_to_train, type='encoder', include_predictions=False, include_embeddings=False)
+        if self.configs['train_last_layer'] == 'yes':
+            encoder_layers_to_train = ['encoder.layer.11.']
+            set_trainable(model_component=self.text_encoder, layer_names=encoder_layers_to_train, type='encoder', include_predictions=False, include_embeddings=False)
 
+        # Freeze parameters of the text_encoder and text_decoder to not train them
         if 'loss_reason' in self.configs['loss'] or 'loss_perplex' in self.configs['loss'] or 'loss_embed_match' in self.configs['loss']:
-            decoder_layers_to_train = ['bert.encoder.layer.11.']
-            set_trainable(model_component=self.text_decoder, layer_names=decoder_layers_to_train, type='decoder', include_predictions=True, include_embeddings=False)
+            if self.configs['train_last_layer'] == 'yes':
+                decoder_layers_to_train = ['bert.encoder.layer.11.']
+                set_trainable(model_component=self.text_decoder, layer_names=decoder_layers_to_train, type='decoder', include_predictions=True, include_embeddings=False)
 
         print("\n********** Text Encoder Trainable Status **********")
         for name, param in self.text_encoder.named_parameters():

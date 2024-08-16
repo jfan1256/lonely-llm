@@ -21,18 +21,22 @@
 #******************************SAD******************************
 #********MLP Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_mlp'
-output_dir: '../paper_experiment/sad/mental_bert_mlp'
-#output_dir: '../paper_experiment/sad/base_bert_mlp'
+#output_dir: '../paper_experiment/sad/mental_bert_mlp'
+output_dir: '../paper_experiment/sad/base_bert_mlp'
 #********Best Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_best'
 #output_dir: '../paper_experiment/sad/base_bert_best'
 #output_dir: '../paper_experiment/sad/mental_bert_best'
 #********Decoder Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_no_decoder'
-##********Sentiment Comparison********
+#********Sentiment Comparison********
+#output_dir: '../paper_experiment/sad/corpus_bert_no_sentiment'
+##********Sentence Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_mlp_sentence'
 #output_dir: '../paper_experiment/sad/corpus_sentence_bert_mlp_sentence'
 #output_dir: '../paper_experiment/sad/mental_bert_mlp_sentence'
+##********Last Layer Comparison********
+#output_dir: '../paper_experiment/sad/mental_bert_mlp_no_last'
 
 # Data
 #******************************Dreaddit******************************
@@ -93,14 +97,17 @@ prompt: ''
 #num_class: 2
 num_class: 9
 
-# Embedding Type
+# Embedding type
 embed_type: 'document'
 #embed_type: 'sentence'
 
+# Train last of bert or not
+train_last_layer: 'yes'
+
 #********************************************************************************MODEL********************************************************************************
 # Model Name
-bert_model: 'mental/mental-bert-base-uncased'
-#bert_model: 'bert-base-uncased'
+#bert_model: 'mental/mental-bert-base-uncased'
+bert_model: 'bert-base-uncased'
 bert_model_checkpoint: ''
 #bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
 #bert_model_checkpoint: '../store_model/bert_corpus_sent_checkpoint_03.pth'
