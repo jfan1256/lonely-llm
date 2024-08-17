@@ -15,12 +15,12 @@
 #  Requirement: Provide an explanation strictly based on the given label. Write the response entirely in lowercase, without referencing the label or classification process, and format it as a single paragraph.
 #  Task: Review the narrative and the provided label. Analyze and explain the classification by discussing context, specific examples from the narrative, and relevant psychological insights. Identify which aspects of the narrative are typical indicators of stress or non-stress and justify their relevance.
 #*************SAD*************
-data_path: '../data/SAD/process/train.csv'
-output_path: '../data/SAD/process/sad_train_gpt4o_improved.csv'
+#data_path: '../data/SAD/process/train.csv'
+#output_path: '../data/SAD/process/sad_train_gpt4o_improved.csv'
 #data_path: '../data/SAD/process/val.csv'
 #output_path: '../data/SAD/process/sad_val_gpt4o_improved.csv'
-#data_path: '../data/SAD/process/test.csv'
-#output_path: '../data/SAD/process/sad_test_gpt4o_improved.csv'
+data_path: '../data/SAD/process/test.csv'
+output_path: '../data/SAD/process/sad_test_gpt4o_improved.csv'
 prompt: |
   Role: Stress Psychiatrist
   Description: The task involves assessing narratives that have been previously evaluated and labeled by professional stress psychiatrists. Each narrative is classified with a multiclass label: 0 indicates the narrative was authored by an individual experiencing stress due to work; 1 indicates the narrative was authored by an individual experiencing stress due to school; 2 indicates the narrative was authored by an individual experiencing stress due to family issues; 3 indicates the narrative was authored by an individual experiencing stress due to financial problem; 4 indicates the narrative was authored by an individual experiencing stress due to social relationships; 5 indicates the narrative was authored by an individual experiencing stress due to health issues; 6 indicates the narrative was authored by an individual experiencing stress due to emotional turmoil; 7 indicates the narrative was authored by an individual experiencing stress due to everyday decision making; 8 indicates the narrative was authored by an individual experiencing stress due to other causes.

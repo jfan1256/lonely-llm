@@ -17,26 +17,32 @@
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_sentence'
 #output_dir: '../paper_experiment/dreaddit/corpus_sentence_bert_mlp_sentence'
 #output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_sentence'
+#********Last Layer Comparison********
+#output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_no_last'
+#********All Layer Comparison********
+#output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_all'
 
 #******************************SAD******************************
 #********MLP Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_mlp'
 #output_dir: '../paper_experiment/sad/mental_bert_mlp'
-output_dir: '../paper_experiment/sad/base_bert_mlp'
+#output_dir: '../paper_experiment/sad/base_bert_mlp'
 #********Best Comparison********
-#output_dir: '../paper_experiment/sad/corpus_bert_best'
+output_dir: '../paper_experiment/sad/corpus_bert_best'
 #output_dir: '../paper_experiment/sad/base_bert_best'
 #output_dir: '../paper_experiment/sad/mental_bert_best'
 #********Decoder Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_no_decoder'
 #********Sentiment Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_no_sentiment'
-##********Sentence Comparison********
+#********Sentence Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_mlp_sentence'
 #output_dir: '../paper_experiment/sad/corpus_sentence_bert_mlp_sentence'
 #output_dir: '../paper_experiment/sad/mental_bert_mlp_sentence'
-##********Last Layer Comparison********
-#output_dir: '../paper_experiment/sad/mental_bert_mlp_no_last'
+#********Last Layer Comparison********
+#output_dir: '../paper_experiment/sad/corpus_bert_mlp_no_last'
+#********All Layer Comparison********
+#output_dir: '../paper_experiment/sad/corpus_bert_no_decoder_all'
 
 # Data
 #******************************Dreaddit******************************
@@ -58,9 +64,12 @@ output_dir: '../paper_experiment/sad/base_bert_mlp'
 #test_path: '../data/DR/process/test.csv'
 
 #******************************SAD******************************
-train_path: '../data/SAD/process/train.csv'
-val_path: '../data/SAD/process/val.csv'
-test_path: '../data/SAD/process/test.csv'
+#train_path: '../data/SAD/process/train.csv'
+#val_path: '../data/SAD/process/val.csv'
+#test_path: '../data/SAD/process/test.csv'
+train_path: '../data/SAD/process/sad_train_gpt4o_improved.csv'
+val_path: '../data/SAD/process/sad_val_gpt4o_improved.csv'
+test_path: '../data/SAD/process/sad_test_gpt4o_improved.csv'
 
 # Checkpoint
 train_checkpoint: ''
@@ -77,7 +86,7 @@ package: 'gloo'
 
 # Device
 train_device: 'cuda:1'
-eval_device: 'cuda:1'
+eval_device: 'cuda:0'
 
 # Param
 batch_size: 8
@@ -101,25 +110,25 @@ num_class: 9
 embed_type: 'document'
 #embed_type: 'sentence'
 
-# Train last of bert or not
-train_last_layer: 'yes'
+# BERT Layer Train
+bert_layer_train: 'last'
 
 #********************************************************************************MODEL********************************************************************************
 # Model Name
 #bert_model: 'mental/mental-bert-base-uncased'
 bert_model: 'bert-base-uncased'
-bert_model_checkpoint: ''
-#bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
+#bert_model_checkpoint: ''
+bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
 #bert_model_checkpoint: '../store_model/bert_corpus_sent_checkpoint_03.pth'
 
 # Loss
 loss:
-  - loss_ce
-#  - loss_focal
-#  - loss_dice
-#  - loss_tversky
-#  - loss_contrast
-#  - loss_reason
+#  - loss_ce
+  - loss_focal
+  - loss_dice
+  - loss_tversky
+  - loss_contrast
+  - loss_reason
 
 #********************************************************************************LOSS********************************************************************************
 # Alpha for loss allocation

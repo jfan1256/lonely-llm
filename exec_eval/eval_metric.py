@@ -94,6 +94,7 @@ if __name__ == '__main__':
                     results = model(index=index, narrative=narrative, label=label, reason=reason, sentiment=sentiment, device=current_configs['eval_device'])
                     probs = model.classify(narrative=narrative, num_class=current_configs['num_class'], device=current_configs['eval_device']).detach().cpu().numpy().tolist()
                     if current_configs['num_class'] == 2:
+                        probs = np.array(probs)
                         preds = (probs > 0.5).astype(int).tolist()
                     else:
                         preds = np.argmax(probs, axis=1).tolist()

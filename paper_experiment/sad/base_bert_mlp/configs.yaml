@@ -5,7 +5,7 @@ alpha_tverksy: 0.2
 batch_size: 8
 bert_config: ../configs/model/bert_base.json
 bert_lr: 1.0e-05
-bert_model: mental/mental-bert-base-uncased
+bert_model: bert-base-uncased
 bert_model_checkpoint: ''
 beta_tversky: 0.8
 early_stop: 5
@@ -21,13 +21,13 @@ min_lr: 0
 mlp_lr: 3.0e-05
 num_class: 9
 num_gpu: 1
-output_dir: ../paper_experiment/sad/mental_bert_mlp_no_last
+output_dir: ../paper_experiment/sad/base_bert_mlp
 package: gloo
 prompt: ''
 test_path: ../data/SAD/process/test.csv
 train_checkpoint: ''
 train_device: cuda:1
-train_last_layer: no
+train_last_layer: 'yes'
 train_path: ../data/SAD/process/train.csv
 val_path: ../data/SAD/process/val.csv
 weight_decay: 0.05
