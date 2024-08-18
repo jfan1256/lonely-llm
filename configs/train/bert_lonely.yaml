@@ -29,7 +29,7 @@
 #output_dir: '../paper_experiment/sad/base_bert_mlp'
 #********Best Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_best'
-output_dir: '../paper_experiment/sad/base_bert_best'
+#output_dir: '../paper_experiment/sad/base_bert_best'
 #output_dir: '../paper_experiment/sad/mental_bert_best'
 #********Decoder Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_no_decoder'
@@ -50,7 +50,7 @@ output_dir: '../paper_experiment/sad/base_bert_best'
 #output_dir: '../paper_experiment/loneliness/mental_bert_mlp'
 #output_dir: '../paper_experiment/loneliness/base_bert_mlp'
 #********Best Comparison********
-#output_dir: '../paper_experiment/loneliness/corpus_bert_best'
+output_dir: '../paper_experiment/loneliness/corpus_bert_best'
 #output_dir: '../paper_experiment/loneliness/base_bert_best'
 #output_dir: '../paper_experiment/loneliness/mental_bert_best'
 #********Decoder Comparison********
@@ -58,13 +58,35 @@ output_dir: '../paper_experiment/sad/base_bert_best'
 #********Sentiment Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_sentiment'
 #********Sentence Comparison********
-#output_dir: '../paper_experiment/salonelinessd/corpus_bert_mlp_sentence'
+#output_dir: '../paper_experiment/loneliness/corpus_bert_mlp_sentence'
 #output_dir: '../paper_experiment/loneliness/corpus_sentence_bert_mlp_sentence'
 #output_dir: '../paper_experiment/loneliness/mental_bert_mlp_sentence'
 #********Last Layer Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_mlp_no_last'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_all'
+
+#******************************CAMS******************************
+#********MLP Comparison********
+#output_dir: '../paper_experiment/cams/corpus_bert_mlp'
+#output_dir: '../paper_experiment/cams/mental_bert_mlp'
+#output_dir: '../paper_experiment/cams/base_bert_mlp'
+#********Best Comparison********
+#output_dir: '../paper_experiment/cams/corpus_bert_best'
+#output_dir: '../paper_experiment/cams/base_bert_best'
+#output_dir: '../paper_experiment/cams/mental_bert_best'
+#********Decoder Comparison********
+#output_dir: '../paper_experiment/cams/corpus_bert_no_decoder'
+#********Sentiment Comparison********
+#output_dir: '../paper_experiment/cams/corpus_bert_no_sentiment'
+#********Sentence Comparison********
+#output_dir: '../paper_experiment/cams/corpus_bert_mlp_sentence'
+#output_dir: '../paper_experiment/cams/corpus_sentence_bert_mlp_sentence'
+#output_dir: '../paper_experiment/cams/mental_bert_mlp_sentence'
+#********Last Layer Comparison********
+#output_dir: '../paper_experiment/cams/corpus_bert_mlp_no_last'
+#********All Layer Comparison********
+#output_dir: '../paper_experiment/cams/corpus_bert_no_decoder_all'
 
 # Data
 #******************************Dreaddit******************************
@@ -79,14 +101,21 @@ output_dir: '../paper_experiment/sad/base_bert_best'
 #train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
 #val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
 #test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
-
+train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1_gpt4o_improved.csv'
+val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1_gpt4o_improved.csv'
+test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1_gpt4o_improved.csv'
 #******************************SAD******************************
 #train_path: '../data/SAD/process/train.csv'
 #val_path: '../data/SAD/process/val.csv'
 #test_path: '../data/SAD/process/test.csv'
-train_path: '../data/SAD/process/sad_train_gpt4o_improved.csv'
-val_path: '../data/SAD/process/sad_val_gpt4o_improved.csv'
-test_path: '../data/SAD/process/sad_test_gpt4o_improved.csv'
+#train_path: '../data/SAD/process/sad_train_gpt4o_improved.csv'
+#val_path: '../data/SAD/process/sad_val_gpt4o_improved.csv'
+#test_path: '../data/SAD/process/sad_test_gpt4o_improved.csv'
+
+#******************************CAMS******************************
+#train_path: '../data/CAMS/SamplingData-1/cams-train.csv'
+#val_path: '../data/CAMS/SamplingData-1/cams-val.csv'
+#test_path: '../data/CAMS/SamplingData-1/cams-test.csv'
 
 # Checkpoint
 train_checkpoint: ''
@@ -120,8 +149,9 @@ min_lr: 0
 prompt: ''
 
 # Number of classes
-#num_class: 2
-num_class: 9
+num_class: 2
+#num_class: 9
+#num_class: 6
 
 # Embedding type
 embed_type: 'document'
@@ -134,8 +164,8 @@ bert_layer_train: 'last'
 # Model Name
 #bert_model: 'mental/mental-bert-base-uncased'
 bert_model: 'bert-base-uncased'
-bert_model_checkpoint: ''
-#bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
+#bert_model_checkpoint: ''
+bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
 #bert_model_checkpoint: '../store_model/bert_corpus_sent_checkpoint_03.pth'
 
 # Loss

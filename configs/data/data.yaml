@@ -2,10 +2,10 @@
 #*************Lonely*************
 #data_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
 #output_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1_gpt4o_improved.csv'
-data_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
-output_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1_gpt4o_improved.csv'
-#data_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
-#output_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1_gpt4o_improved.csv'
+#data_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
+#output_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1_gpt4o_improved.csv'
+data_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
+output_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1_gpt4o_improved.csv'
 prompt: |
   Role: Loneliness Psychiatrist
   Description: The task involves assessing narratives that have been previously evaluated and labeled by professional loneliness psychiatrists. Each narrative is classified with a binary label: 1 indicates the narrative was authored by an individual experiencing loneliness, and 0 indicates the opposite.

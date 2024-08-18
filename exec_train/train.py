@@ -123,7 +123,9 @@ def main(args, configs):
     print_header("Initialize Dataloader")
     # Load data
     train_data = pd.read_csv(configs['train_path'])
+    train_data = train_data.fillna("no reason")
     val_data = pd.read_csv(configs['val_path'])
+    val_data = val_data.fillna("no reason")
 
     # Shuffle data
     train_data = train_data.sample(frac=1, random_state=20050531).reset_index(drop=True)

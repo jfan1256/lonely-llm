@@ -73,7 +73,6 @@ class ReasonGPT:
                 new_data = pd.DataFrame([[narrative, label, reason]], columns=['narrative', 'label', 'reason'])
                 processed_data = pd.concat([processed_data, new_data], ignore_index=True)
                 processed_data.to_csv(self.output_path, index=False)
-                time.sleep(0.5)
 
     def reason_gpt(self):
         items = self._create_item_list()

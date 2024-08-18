@@ -1,3 +1,5 @@
+import pandas as pd
+
 from torch.utils.data import Dataset
 
 from class_dataloader.utils import preprocess_text

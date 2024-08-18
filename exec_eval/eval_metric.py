@@ -58,6 +58,7 @@ if __name__ == '__main__':
     # Load in test data
     print_header("Initialize Dataloader")
     test_data = pd.read_csv(configs['test_path'])
+    test_data = test_data.fillna("no reason")
     dataset = Train(data=test_data)
     dataloader = DataLoader(dataset, batch_size=8, shuffle=False, drop_last=False)
 
