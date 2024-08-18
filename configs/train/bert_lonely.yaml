@@ -28,8 +28,8 @@
 #output_dir: '../paper_experiment/sad/mental_bert_mlp'
 #output_dir: '../paper_experiment/sad/base_bert_mlp'
 #********Best Comparison********
-output_dir: '../paper_experiment/sad/corpus_bert_best'
-#output_dir: '../paper_experiment/sad/base_bert_best'
+#output_dir: '../paper_experiment/sad/corpus_bert_best'
+output_dir: '../paper_experiment/sad/base_bert_best'
 #output_dir: '../paper_experiment/sad/mental_bert_best'
 #********Decoder Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_no_decoder'
@@ -44,6 +44,28 @@ output_dir: '../paper_experiment/sad/corpus_bert_best'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/sad/corpus_bert_no_decoder_all'
 
+#******************************LONELINESS******************************
+#********MLP Comparison********
+#output_dir: '../paper_experiment/loneliness/corpus_bert_mlp'
+#output_dir: '../paper_experiment/loneliness/mental_bert_mlp'
+#output_dir: '../paper_experiment/loneliness/base_bert_mlp'
+#********Best Comparison********
+#output_dir: '../paper_experiment/loneliness/corpus_bert_best'
+#output_dir: '../paper_experiment/loneliness/base_bert_best'
+#output_dir: '../paper_experiment/loneliness/mental_bert_best'
+#********Decoder Comparison********
+#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder'
+#********Sentiment Comparison********
+#output_dir: '../paper_experiment/loneliness/corpus_bert_no_sentiment'
+#********Sentence Comparison********
+#output_dir: '../paper_experiment/salonelinessd/corpus_bert_mlp_sentence'
+#output_dir: '../paper_experiment/loneliness/corpus_sentence_bert_mlp_sentence'
+#output_dir: '../paper_experiment/loneliness/mental_bert_mlp_sentence'
+#********Last Layer Comparison********
+#output_dir: '../paper_experiment/loneliness/corpus_bert_mlp_no_last'
+#********All Layer Comparison********
+#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_all'
+
 # Data
 #******************************Dreaddit******************************
 #train_path: '../data/dreaddit/Processed/processed_dreaddit-train.csv'
@@ -57,11 +79,6 @@ output_dir: '../paper_experiment/sad/corpus_bert_best'
 #train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
 #val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
 #test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
-
-#******************************DR******************************
-#train_path: '../data/DR/process/train.csv'
-#val_path: '../data/DR/process/val.csv'
-#test_path: '../data/DR/process/test.csv'
 
 #******************************SAD******************************
 #train_path: '../data/SAD/process/train.csv'
@@ -85,8 +102,8 @@ num_gpu: 1
 package: 'gloo'
 
 # Device
-train_device: 'cuda:1'
-eval_device: 'cuda:0'
+train_device: 'cuda:0'
+eval_device: 'cuda:1'
 
 # Param
 batch_size: 8
@@ -117,8 +134,8 @@ bert_layer_train: 'last'
 # Model Name
 #bert_model: 'mental/mental-bert-base-uncased'
 bert_model: 'bert-base-uncased'
-#bert_model_checkpoint: ''
-bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
+bert_model_checkpoint: ''
+#bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
 #bert_model_checkpoint: '../store_model/bert_corpus_sent_checkpoint_03.pth'
 
 # Loss
