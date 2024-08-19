@@ -22,7 +22,7 @@
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_no_last'
 #output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_no_last'
 #output_dir: '../paper_experiment/dreaddit/base_bert_mlp_no_last'
-output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_no_all'
+output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_all'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_all'
 
