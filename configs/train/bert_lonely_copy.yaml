@@ -10,7 +10,8 @@
 #output_dir: '../paper_experiment/dreaddit/base_bert_best'
 #output_dir: '../paper_experiment/dreaddit/mental_bert_best'
 #********Decoder Comparison********
-output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_0.97'
+#output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder'
+#output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_0.95'
 #********Sentiment Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_no_sentiment'
 #********Sentence Comparison********
@@ -19,6 +20,7 @@ output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_0.97'
 #output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_sentence'
 #********Last Layer Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_no_last'
+output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_all'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_all'
 
@@ -56,10 +58,7 @@ output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_0.97'
 #********Decoder Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder'
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.8'
-#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.7'
-#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.6'
-#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.5'
-#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.4'
+#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.1'
 #********Sentiment Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_sentiment'
 #********Sentence Comparison********
@@ -67,7 +66,6 @@ output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_0.97'
 #output_dir: '../paper_experiment/loneliness/corpus_sentence_bert_mlp_sentence'
 #output_dir: '../paper_experiment/loneliness/mental_bert_mlp_sentence'
 #********Last Layer Comparison********
-#output_dir: '../paper_experiment/loneliness/corpus_bert_mlp_all'
 #output_dir: '../paper_experiment/loneliness/corpus_bert_mlp_no_last'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_all'
@@ -99,17 +97,17 @@ output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_0.97'
 #train_path: '../data/dreaddit/Processed/processed_dreaddit-train.csv'
 #val_path: '../data/dreaddit/Processed/processed_dreaddit-val.csv'
 #test_path: '../data/dreaddit/Processed/processed_dreaddit-test.csv'
-#train_path: '../data/dreaddit/Processed/dreaddit_train_gpt4o_improved.csv'
-#val_path: '../data/dreaddit/Processed/dreaddit_val_gpt4o_improved.csv'
-#test_path: '../data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
+train_path: '../data/dreaddit/Processed/dreaddit_train_gpt4o_improved.csv'
+val_path: '../data/dreaddit/Processed/dreaddit_val_gpt4o_improved.csv'
+test_path: '../data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
 
 #******************************Lonely******************************
 #train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
 #val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
 #test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
-train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1_gpt4o_improved.csv'
-val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1_gpt4o_improved.csv'
-test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1_gpt4o_improved.csv'
+#train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1_gpt4o_improved.csv'
+#val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1_gpt4o_improved.csv'
+#test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1_gpt4o_improved.csv'
 #******************************SAD******************************
 #train_path: '../data/SAD/process/train.csv'
 #val_path: '../data/SAD/process/val.csv'
@@ -137,8 +135,8 @@ num_gpu: 1
 package: 'gloo'
 
 # Device
-train_device: 'cuda:0'
-eval_device: 'cuda:0'
+train_device: 'cuda:1'
+eval_device: 'cuda:1'
 
 # Param
 batch_size: 8
@@ -164,7 +162,7 @@ embed_type: 'document'
 #embed_type: 'sentence'
 
 # BERT Layer Train
-bert_layer_train: 'last'
+bert_layer_train: 'all'
 
 #********************************************************************************MODEL********************************************************************************
 # Model Name
@@ -176,18 +174,18 @@ bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
 
 # Loss
 loss:
-#  - loss_ce
-  - loss_focal
-  - loss_dice
-  - loss_tversky
-  - loss_contrast
+  - loss_ce
+#  - loss_focal
+#  - loss_dice
+#  - loss_tversky
+#  - loss_contrast
 #  - loss_reason
 
 #********************************************************************************LOSS********************************************************************************
 # Alpha for loss allocation
 #alpha: 0.9 # Ratio of lonely losses to sentiment losses (i.e., 0.75 * loss_focal_task + (1 - 0.75) * loss_focal_sentiment)
 #alpha: 1.0
-alpha: 0.97
+alpha: 0.95
 
 # Center Loss
 alpha_center: 0.5
