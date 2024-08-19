@@ -18,11 +18,13 @@
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_sentence'
 #output_dir: '../paper_experiment/dreaddit/corpus_sentence_bert_mlp_sentence'
 #output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_sentence'
+#output_dir: '../paper_experiment/dreaddit/base_bert_mlp_sentence'
 #********Last Layer Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_no_last'
 #output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_no_last'
+#output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_no_all'
 #output_dir: '../paper_experiment/dreaddit/base_bert_mlp_no_last'
-output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_all'
+#output_dir: '../paper_experiment/dreaddit/base_bert_mlp_all'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_all'
 
@@ -48,12 +50,13 @@ output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_all'
 #output_dir: '../paper_experiment/loneliness/corpus_bert_mlp_sentence'
 #output_dir: '../paper_experiment/loneliness/corpus_sentence_bert_mlp_sentence'
 #output_dir: '../paper_experiment/loneliness/mental_bert_mlp_sentence'
+output_dir: '../paper_experiment/loneliness/base_bert_mlp_sentence'
 #********Last Layer Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_mlp_all'
 #output_dir: '../paper_experiment/loneliness/corpus_bert_mlp_no_last'
 #output_dir: '../paper_experiment/loneliness/mental_bert_mlp_no_last'
-#output_dir: '../paper_experiment/loneliness/mental_bert_mlp_all'
 #output_dir: '../paper_experiment/loneliness/base_bert_mlp_no_last'
+#output_dir: '../paper_experiment/loneliness/base_bert_mlp_all'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_all'
 
@@ -62,29 +65,17 @@ output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_all'
 #train_path: '../data/dreaddit/Processed/processed_dreaddit-train.csv'
 #val_path: '../data/dreaddit/Processed/processed_dreaddit-val.csv'
 #test_path: '../data/dreaddit/Processed/processed_dreaddit-test.csv'
-train_path: '../data/dreaddit/Processed/dreaddit_train_gpt4o_improved.csv'
-val_path: '../data/dreaddit/Processed/dreaddit_val_gpt4o_improved.csv'
-test_path: '../data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
+#train_path: '../data/dreaddit/Processed/dreaddit_train_gpt4o_improved.csv'
+#val_path: '../data/dreaddit/Processed/dreaddit_val_gpt4o_improved.csv'
+#test_path: '../data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
 
 #******************************Lonely******************************
 #train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
 #val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
 #test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
-#train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1_gpt4o_improved.csv'
-#val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1_gpt4o_improved.csv'
-#test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1_gpt4o_improved.csv'
-#******************************SAD******************************
-#train_path: '../data/SAD/process/train.csv'
-#val_path: '../data/SAD/process/val.csv'
-#test_path: '../data/SAD/process/test.csv'
-#train_path: '../data/SAD/process/sad_train_gpt4o_improved.csv'
-#val_path: '../data/SAD/process/sad_val_gpt4o_improved.csv'
-#test_path: '../data/SAD/process/sad_test_gpt4o_improved.csv'
-
-#******************************CAMS******************************
-#train_path: '../data/CAMS/SamplingData-1/cams-train.csv'
-#val_path: '../data/CAMS/SamplingData-1/cams-val.csv'
-#test_path: '../data/CAMS/SamplingData-1/cams-test.csv'
+train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1_gpt4o_improved.csv'
+val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1_gpt4o_improved.csv'
+test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1_gpt4o_improved.csv'
 
 # Checkpoint
 train_checkpoint: ''
@@ -123,16 +114,16 @@ num_class: 2
 #num_class: 6
 
 # Embedding type
-embed_type: 'document'
-#embed_type: 'sentence'
+#embed_type: 'document'
+embed_type: 'sentence'
 
 # BERT Layer Train
-bert_layer_train: 'all'
+bert_layer_train: 'last'
 
 #********************************************************************************MODEL********************************************************************************
 # Model Name
-bert_model: 'mental/mental-bert-base-uncased'
-#bert_model: 'bert-base-uncased'
+#bert_model: 'mental/mental-bert-base-uncased'
+bert_model: 'bert-base-uncased'
 bert_model_checkpoint: ''
 #bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
 #bert_model_checkpoint: '../store_model/bert_corpus_sent_checkpoint_03.pth'
