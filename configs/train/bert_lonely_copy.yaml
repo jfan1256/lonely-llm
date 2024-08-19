@@ -10,8 +10,8 @@
 #output_dir: '../paper_experiment/dreaddit/base_bert_best'
 #output_dir: '../paper_experiment/dreaddit/mental_bert_best'
 #********Decoder Comparison********
-#output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder'
-#output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_0.95'
+#output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_0.97'
+#output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_no_last_0.95'
 #********Sentiment Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_no_sentiment'
 #********Sentence Comparison********
@@ -20,31 +20,11 @@
 #output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_sentence'
 #********Last Layer Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_no_last'
-output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_all'
+#output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_no_last'
+#output_dir: '../paper_experiment/dreaddit/base_bert_mlp_no_last'
+output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_no_all'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_all'
-
-#******************************SAD******************************
-#********MLP Comparison********
-#output_dir: '../paper_experiment/sad/corpus_bert_mlp'
-#output_dir: '../paper_experiment/sad/mental_bert_mlp'
-#output_dir: '../paper_experiment/sad/base_bert_mlp'
-#********Best Comparison********
-#output_dir: '../paper_experiment/sad/corpus_bert_best'
-#output_dir: '../paper_experiment/sad/base_bert_best'
-#output_dir: '../paper_experiment/sad/mental_bert_best'
-#********Decoder Comparison********
-#output_dir: '../paper_experiment/sad/corpus_bert_no_decoder'
-#********Sentiment Comparison********
-#output_dir: '../paper_experiment/sad/corpus_bert_no_sentiment'
-#********Sentence Comparison********
-#output_dir: '../paper_experiment/sad/corpus_bert_mlp_sentence'
-#output_dir: '../paper_experiment/sad/corpus_sentence_bert_mlp_sentence'
-#output_dir: '../paper_experiment/sad/mental_bert_mlp_sentence'
-#********Last Layer Comparison********
-#output_dir: '../paper_experiment/sad/corpus_bert_mlp_no_last'
-#********All Layer Comparison********
-#output_dir: '../paper_experiment/sad/corpus_bert_no_decoder_all'
 
 #******************************LONELINESS******************************
 #********MLP Comparison********
@@ -58,7 +38,10 @@ output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_all'
 #********Decoder Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder'
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.8'
-#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.1'
+#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.7'
+#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.6'
+#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.5'
+#output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.4'
 #********Sentiment Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_sentiment'
 #********Sentence Comparison********
@@ -66,31 +49,13 @@ output_dir: '../paper_experiment/dreaddit/corpus_bert_mlp_all'
 #output_dir: '../paper_experiment/loneliness/corpus_sentence_bert_mlp_sentence'
 #output_dir: '../paper_experiment/loneliness/mental_bert_mlp_sentence'
 #********Last Layer Comparison********
+#output_dir: '../paper_experiment/loneliness/corpus_bert_mlp_all'
 #output_dir: '../paper_experiment/loneliness/corpus_bert_mlp_no_last'
+#output_dir: '../paper_experiment/loneliness/mental_bert_mlp_no_last'
+#output_dir: '../paper_experiment/loneliness/mental_bert_mlp_all'
+#output_dir: '../paper_experiment/loneliness/base_bert_mlp_no_last'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_all'
-
-#******************************CAMS******************************
-#********MLP Comparison********
-#output_dir: '../paper_experiment/cams/corpus_bert_mlp'
-#output_dir: '../paper_experiment/cams/mental_bert_mlp'
-#output_dir: '../paper_experiment/cams/base_bert_mlp'
-#********Best Comparison********
-#output_dir: '../paper_experiment/cams/corpus_bert_best'
-#output_dir: '../paper_experiment/cams/base_bert_best'
-#output_dir: '../paper_experiment/cams/mental_bert_best'
-#********Decoder Comparison********
-#output_dir: '../paper_experiment/cams/corpus_bert_no_decoder'
-#********Sentiment Comparison********
-#output_dir: '../paper_experiment/cams/corpus_bert_no_sentiment'
-#********Sentence Comparison********
-#output_dir: '../paper_experiment/cams/corpus_bert_mlp_sentence'
-#output_dir: '../paper_experiment/cams/corpus_sentence_bert_mlp_sentence'
-#output_dir: '../paper_experiment/cams/mental_bert_mlp_sentence'
-#********Last Layer Comparison********
-#output_dir: '../paper_experiment/cams/corpus_bert_mlp_no_last'
-#********All Layer Comparison********
-#output_dir: '../paper_experiment/cams/corpus_bert_no_decoder_all'
 
 # Data
 #******************************Dreaddit******************************
@@ -166,10 +131,10 @@ bert_layer_train: 'all'
 
 #********************************************************************************MODEL********************************************************************************
 # Model Name
-#bert_model: 'mental/mental-bert-base-uncased'
-bert_model: 'bert-base-uncased'
-#bert_model_checkpoint: ''
-bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
+bert_model: 'mental/mental-bert-base-uncased'
+#bert_model: 'bert-base-uncased'
+bert_model_checkpoint: ''
+#bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
 #bert_model_checkpoint: '../store_model/bert_corpus_sent_checkpoint_03.pth'
 
 # Loss
