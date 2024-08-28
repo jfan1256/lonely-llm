@@ -7,6 +7,10 @@ import torch.distributed as dist
 
 from collections import defaultdict, deque
 
+def freeze_param(model):
+    for param in model.parameters():
+        param.requires_grad = False
+
 def cosine_lr_schedule(optimizer, group, epoch, max_epoch, init_lr, min_lr):
     """Decay the learning rate"""
     lr = (init_lr - min_lr) * 0.5 * (1. + math.cos(math.pi * epoch / max_epoch)) + min_lr

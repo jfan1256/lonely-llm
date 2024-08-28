@@ -4,8 +4,10 @@ from utils.system import get_data
 
 # Get file paths
 base_path = get_data()
-folder_path = base_path / "corpus" / "ProcessedRedditRawData"
-new_path = base_path / "corpus" / "StatsOfFiles"
+# folder_path = base_path / "corpus" / "ProcessedRedditRawData"
+# new_path = base_path / "corpus" / "StatsOfFiles"
+folder_path = base_path / "loneliness" / "ProcessedRedditRawData"
+new_path = base_path / "loneliness" / "StatsOfFiles"
 
 # Initialize variables to store results
 all_word_counts = []

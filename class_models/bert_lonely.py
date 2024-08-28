@@ -54,24 +54,24 @@ class BertLonely(nn.Module):
             self.text_decoder.resize_token_embeddings(len(self.tokenizer))
             print('Text Decoder Number of Params: %.2fM' % (total / 1e6))
 
-            # Tie Encoder and Decoder
-            print("\n********** Tie Encoder and Decoder **********")
-            tie_encoder_decoder_weights(self.text_encoder, self.text_decoder.bert, '', '/attention')
+            # # Tie Encoder and Decoder
+            # print("\n********** Tie Encoder and Decoder **********")
+            # tie_encoder_decoder_weights(self.text_encoder, self.text_decoder.bert, '', '/attention')
 
         # Freeze parameters of the text_encoder and text_decoder to not train them
-        if self.configs['bert_layer_train'] == 'last':
+        if self.configs['encoder_layer_train'] == 'last':
             encoder_layers_to_train = ['encoder.layer.11.']
             set_trainable(model_component=self.text_encoder, layer_names=encoder_layers_to_train, type='encoder', include_predictions=False, include_embeddings=False)
-        elif self.configs['bert_layer_train'] == 'none':
+        elif self.configs['encoder_layer_train'] == 'none':
             encoder_layers_to_train = []
             set_trainable(model_component=self.text_encoder, layer_names=encoder_layers_to_train, type='encoder', include_predictions=False, include_embeddings=False)
 
         # Freeze parameters of the text_encoder and text_decoder to not train them
         if 'loss_reason' in self.configs['loss'] or 'loss_perplex' in self.configs['loss'] or 'loss_embed_match' in self.configs['loss']:
-            if self.configs['bert_layer_train'] == 'last':
+            if self.configs['decoder_layer_train'] == 'last':
                 decoder_layers_to_train = ['bert.encoder.layer.11.']
                 set_trainable(model_component=self.text_decoder, layer_names=decoder_layers_to_train, type='decoder', include_predictions=True, include_embeddings=False)
-            elif self.configs['bert_layer_train'] == 'none':
+            elif self.configs['decoder_layer_train'] == 'none':
                 decoder_layers_to_train = []
                 set_trainable(model_component=self.text_decoder, layer_names=decoder_layers_to_train, type='decoder', include_predictions=True, include_embeddings=False)
 
@@ -93,6 +93,8 @@ class BertLonely(nn.Module):
                 nn.Tanh(),
                 nn.Linear(256, 1)
             )
+            total = sum([param.nelement() for param in self.mlp_task.parameters()])
+            print('MLP Task Number of Params: %.2fM' % (total / 1e6))
         else:
             self.mlp_task = nn.Sequential(
                 nn.Linear(bert_config.hidden_size, 512),
@@ -101,6 +103,8 @@ class BertLonely(nn.Module):
                 nn.Tanh(),
                 nn.Linear(256, self.configs['num_class'])
             )
+            total = sum([param.nelement() for param in self.mlp_task.parameters()])
+            print('MLP Task Number of Params: %.2fM' % (total / 1e6))
 
         # Multilayer Perceptron for sentiment
         self.mlp_sentiment = nn.Sequential(
@@ -110,6 +114,8 @@ class BertLonely(nn.Module):
             nn.Tanh(),
             nn.Linear(256, 1)
         )
+        total = sum([param.nelement() for param in self.mlp_sentiment.parameters()])
+        print('MLP Sentiment Number of Params: %.2fM' % (total / 1e6))
 
     # Get sentiment (via VADER)
     def get_sentiment(self, texts):
@@ -300,9 +306,9 @@ class BertLonely(nn.Module):
         return prob
 
     # Generate
-    def generate(self, prompt, device, max_length=128, min_length=10, top_p=0.9):
+    def generate(self, narrative, device, max_length=128, min_length=10, top_p=0.75, temperature=0.75):
         # Tokenize the input prompt
-        text = self.tokenizer(prompt, max_length=max_length, truncation=True, padding='max_length', return_tensors="pt").to(device)
+        text = self.tokenizer(narrative, max_length=max_length, truncation=True, padding='max_length', return_tensors="pt").to(device)
         text_feat = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True, mode='text')
 
         # Hidden States
@@ -312,7 +318,7 @@ class BertLonely(nn.Module):
         encoder_attention_mask = text.attention_mask
 
         # Prompt
-        prompt = [self.configs['prompt']] * len(prompt)
+        prompt = [self.configs['prompt']] * len(narrative)
         input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids.to(device)
 
         # Set up bos_id
@@ -325,10 +331,11 @@ class BertLonely(nn.Module):
                                              min_length=min_length,
                                              do_sample=True,
                                              top_p=top_p,
+                                             temperature=temperature,
                                              num_return_sequences=1,
                                              eos_token_id=self.tokenizer.sep_token_id,
                                              pad_token_id=self.tokenizer.pad_token_id,
-                                             repetition_penalty=1.1,
+                                             repetition_penalty=1.5,
                                              encoder_hidden_states=encoder_hidden_states,
                                              encoder_attention_mask=encoder_attention_mask)
 

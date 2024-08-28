@@ -1,0 +1,4 @@
+checkpoint_01.pth --> F1 Score: 0.7487  Precision: 0.6487  Recall: 0.8853  loss_ce: 0.0000  loss_focal: 0.1043  loss_dice: 0.2760  loss_tversky: 0.2273  loss_center: 0.0000  loss_angular: 0.0000  loss_contrast: 0.1393  loss_reason: 0.0000  loss_perplex: 0.0000  loss_embed_match: 0.0000
+checkpoint_02.pth --> F1 Score: 0.7605  Precision: 0.6599  Recall: 0.8973  loss_ce: 0.0000  loss_focal: 0.1194  loss_dice: 0.2359  loss_tversky: 0.1723  loss_center: 0.0000  loss_angular: 0.0000  loss_contrast: 0.1323  loss_reason: 0.0000  loss_perplex: 0.0000  loss_embed_match: 0.0000
+checkpoint_03.pth --> F1 Score: 0.7463  Precision: 0.6858  Recall: 0.8185  loss_ce: 0.0000  loss_focal: 0.1501  loss_dice: 0.2203  loss_tversky: 0.1663  loss_center: 0.0000  loss_angular: 0.0000  loss_contrast: 0.1309  loss_reason: 0.0000  loss_perplex: 0.0000  loss_embed_match: 0.0000
+Best model: checkpoint_02.pth with F1 Score: 0.760522496371553

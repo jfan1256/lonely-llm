@@ -44,26 +44,16 @@ if __name__ == '__main__':
     reason_loss = []
     reason_collect = []
     with torch.no_grad():
-        for (index, prompt, label, reason) in tqdm(dataloader, desc='Evaluate'):
+        for (index, narrative, label, reason) in tqdm(dataloader, desc='Evaluate'):
             label = torch.tensor(label, dtype=torch.float).to(configs['eval_device'])
 
-            # Get sentiment
-            sentiment = bert_lonely.get_sentiment(prompt)
-            sentiment = torch.tensor(sentiment, dtype=torch.float).to(configs['eval_device'])
-
-            loss_binary, loss_sentiment, loss_dice, loss_tversky, loss_constrast, loss_reason, labels = bert_lonely(index=index, prompt=prompt, label=label, reason=reason, sentiment=sentiment, device=configs['eval_device'])
+            # Classify
+            labels = bert_lonely.classify(narrative=narrative, num_class=configs['num_class'], device=configs['eval_device'])
             labels = labels.detach().cpu().numpy().tolist()
-            # labels = [item[0] for item in labels]
             label_collect.extend(labels)
-            lonely_loss.append(loss_binary.item())
-            sentiment_loss.append(loss_sentiment.item())
-            dice_loss.append(loss_dice.item())
-            tversky_loss.append(loss_tversky.item())
-            constrast_loss.append(loss_constrast.item())
-            reason_loss.append(loss_reason.item())
 
             # Generate
-            reason = bert_lonely.generate(prompt=prompt, max_length=128, device=configs['eval_device'])
+            reason = bert_lonely.generate(narrative=narrative, min_length=10, max_length=256, top_p=0.75, temperature=0.75, device=configs['eval_device'])
             reason_collect.extend(reason)
 
     # Create prediction labels

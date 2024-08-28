@@ -27,7 +27,7 @@ from class_models.plot import plot_diagnostics
 from class_models.bert_lonely import init_bert_lonely
 from class_dataloader.utils import create_dataloader, create_sampler
 from class_models.train_utils import MetricLogger, SmoothedValue, cosine_lr_schedule
-from class_models.train_utils import init_distributed_mode, get_rank, get_world_size, is_main_process
+from class_models.train_utils import init_distributed_mode, get_rank, get_world_size, is_main_process, freeze_param
 
 # Training Loop
 def train(epoch, model, dataloader, optimizer, configs):
@@ -45,7 +45,8 @@ def train(epoch, model, dataloader, optimizer, configs):
         metric_logger.add_meter(key, SmoothedValue(window_size=50, fmt='{value:.8f}'))
     metric_logger.add_meter('loss_total', SmoothedValue(window_size=50, fmt='{value:.8f}'))
     metric_logger.add_meter('lr_bert', SmoothedValue(window_size=50, fmt='{value:.8f}'))
-    metric_logger.add_meter('lr_mlp', SmoothedValue(window_size=50, fmt='{value:.8f}'))
+    if configs['decoder_only'] != 'yes':
+        metric_logger.add_meter('lr_mlp', SmoothedValue(window_size=50, fmt='{value:.8f}'))
     header = 'Train Epoch: [{}]'.format(epoch)
     print_freq = 50
 
@@ -72,7 +73,10 @@ def train(epoch, model, dataloader, optimizer, configs):
         # Update metrics
         for key, value in losses.items():
             metric_logger.update(**{key: value.item()})
-        metric_logger.update(loss_total=loss, lr_bert=optimizer.param_groups[0]["lr"], lr_mlp=optimizer.param_groups[1]["lr"])
+        if configs['decoder_only'] == 'yes':
+            metric_logger.update(loss_total=loss, lr_bert=optimizer.param_groups[0]["lr"])
+        else:
+            metric_logger.update(loss_total=loss, lr_bert=optimizer.param_groups[0]["lr"], lr_mlp=optimizer.param_groups[1]["lr"])
 
     # Return stats
     metric_logger.synchronize_between_processes()
@@ -154,15 +158,33 @@ def main(args, configs):
 
     # Initialize optimizer
     print_header("Initialize Optimizer")
-    if 'loss_reason' in configs['loss'] or 'loss_perplex' in configs['loss'] or 'loss_embed_match' in configs['loss']:
-        encoder_decoder_params = list(model.text_encoder.parameters()) + list(model.text_decoder.parameters())
+    encoder_decoder_params = []
+
+    # Handle freezing layers if training only decoder
+    if configs['decoder_only'] == 'yes':
+        freeze_param(model.text_encoder)
+        freeze_param(model.mlp_task)
+        freeze_param(model.mlp_sentiment)
+        encoder_decoder_params += list(model.text_decoder.parameters())
+        # Initialize optimizer
+        optimizer = torch.optim.AdamW([
+            {'params': encoder_decoder_params, 'lr': configs['bert_lr']},
+        ], weight_decay=configs['weight_decay'])
     else:
-        encoder_decoder_params = list(model.text_encoder.parameters())
-    mlp_params = list(model.mlp_task.parameters()) + list(model.mlp_sentiment.parameters())
-    optimizer = torch.optim.AdamW([
-        {'params': encoder_decoder_params, 'lr': configs['bert_lr']},
-        {'params': mlp_params, 'lr': configs['mlp_lr']}
-    ], weight_decay=configs['weight_decay'])
+        # Train decoder parameters if decoder losses are implemented
+        if 'loss_reason' in configs['loss'] or 'loss_perplex' in configs['loss'] or 'loss_embed_match' in configs['loss']:
+            encoder_decoder_params += list(model.text_encoder.parameters()) + list(model.text_decoder.parameters())
+        else:
+            encoder_decoder_params += list(model.text_encoder.parameters())
+
+        # MLP parameters
+        mlp_params = list(model.mlp_task.parameters()) + list(model.mlp_sentiment.parameters())
+
+        # Initialize optimizer with different learning rates
+        optimizer = torch.optim.AdamW([
+            {'params': encoder_decoder_params, 'lr': configs['bert_lr']},
+            {'params': mlp_params, 'lr': configs['mlp_lr']}
+        ], weight_decay=configs['weight_decay'])
 
     # Start epoch
     start_epoch = 0
@@ -172,9 +194,12 @@ def main(args, configs):
         print_header("Load Checkpoint")
         checkpoint = torch.load(configs['train_checkpoint'], map_location='cpu')
         state_dict = checkpoint['model']
-        model.load_state_dict(state_dict)
-        optimizer.load_state_dict(checkpoint['optimizer'])
-        start_epoch = checkpoint['epoch']
+        model.load_state_dict(state_dict, strict=False)
+
+        # Skip this step if training only decoder from classifier checkpoint
+        if configs['decoder_only'] != 'yes':
+            optimizer.load_state_dict(checkpoint['optimizer'])
+            start_epoch = checkpoint['epoch']
 
     # Store model without DDP for saving
     model_without_ddp = model
@@ -199,7 +224,8 @@ def main(args, configs):
 
         # Step the learning rate
         cosine_lr_schedule(optimizer, 0, epoch - 1, configs['max_epoch'], configs['bert_lr'], configs['min_lr'])
-        cosine_lr_schedule(optimizer, 1, epoch - 1, configs['max_epoch'], configs['mlp_lr'], configs['min_lr'])
+        if configs['decoder_only'] != 'yes':
+            cosine_lr_schedule(optimizer, 1, epoch - 1, configs['max_epoch'], configs['mlp_lr'], configs['min_lr'])
 
         # Train model
         train_stats = train(epoch, model, train_dataloader, optimizer, configs)
