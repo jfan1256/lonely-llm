@@ -10,7 +10,7 @@
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_multiloss_no_tversky'
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_multiloss_no_focal'
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_multiloss_no_focal_sentiment_0.90'
-output_dir: '../paper_experiment/dreaddit/best_classifier_decoder_only_all'
+#output_dir: '../paper_experiment/dreaddit/best_classifier_decoder_only_all'
 #output_dir: '../paper_experiment/dreaddit/mental_bert_mlp'
 #output_dir: '../paper_experiment/dreaddit/base_bert_mlp'
 #********Best Comparison********
@@ -60,6 +60,7 @@ output_dir: '../paper_experiment/dreaddit/best_classifier_decoder_only_all'
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.6'
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.5'
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_decoder_0.4'
+output_dir: '../paper_experiment/loneliness/best_classifier_decoder_only_all'
 #********Sentiment Comparison********
 #output_dir: '../paper_experiment/loneliness/corpus_bert_no_sentiment'
 #********Sentence Comparison********
@@ -81,21 +82,21 @@ output_dir: '../paper_experiment/dreaddit/best_classifier_decoder_only_all'
 #train_path: '../data/dreaddit/Processed/processed_dreaddit-train.csv'
 #val_path: '../data/dreaddit/Processed/processed_dreaddit-val.csv'
 #test_path: '../data/dreaddit/Processed/processed_dreaddit-test.csv'
-train_path: '../data/dreaddit/Processed/dreaddit_train_gpt4o_improved.csv'
-val_path: '../data/dreaddit/Processed/dreaddit_val_gpt4o_improved.csv'
-test_path: '../data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
+#train_path: '../data/dreaddit/Processed/dreaddit_train_gpt4o_improved.csv'
+#val_path: '../data/dreaddit/Processed/dreaddit_val_gpt4o_improved.csv'
+#test_path: '../data/dreaddit/Processed/dreaddit_test_gpt4o_improved.csv'
 
 #******************************Lonely******************************
 #train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1.csv'
 #val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1.csv'
 #test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1.csv'
-#train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1_gpt4o_improved.csv'
-#val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1_gpt4o_improved.csv'
-#test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1_gpt4o_improved.csv'
+train_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-train-1_gpt4o_improved.csv'
+val_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-val-1_gpt4o_improved.csv'
+test_path: '../data/loneliness/OurLabeledData/SamplingData-1/loneliness-test-1_gpt4o_improved.csv'
 
 # Checkpoint
-train_checkpoint: '../paper_experiment/dreaddit/corpus_bert_multiloss_0.15tversky_0.9sentiment/checkpoint_04.pth'
-eval_checkpoint: '../paper_experiment/dreaddit/best_classifier_decoder_only_all/checkpoint_22.pth'
+train_checkpoint: '../paper_experiment/loneliness/corpus_bert_multiloss_0.7tversky_sentiment0.3/checkpoint_02.pth'
+eval_checkpoint: '../paper_experiment/loneliness/best_classifier_decoder_only_all/checkpoint_21.pth'
 
 # Bert Config
 bert_config: '../configs/model/bert_base.json'
@@ -179,8 +180,8 @@ gamma_focal: 2 # Higher value penalizes indifferent probabilities
 #beta_tversky: 0.8 # Higher value penalizes False Positives more (identifying a person as lonely when they actually are not)
 #alpha_tverksy: 0.6 # Higher value penalizes False Negatives more (identifying a person as not lonely when they actually are)
 #beta_tversky: 0.4 # Higher value penalizes False Positives more (identifying a person as lonely when they actually are not)
-alpha_tverksy: 0.15 # Higher value penalizes False Negatives more (identifying a person as not lonely when they actually are)
-beta_tversky: 0.85 # Higher value penalizes False Positives more (identifying a person as lonely when they actually are not)
+alpha_tverksy: 0.7 # Higher value penalizes False Negatives more (identifying a person as not lonely when they actually are)
+beta_tversky: 0.3 # Higher value penalizes False Positives more (identifying a person as lonely when they actually are not)
 
 # Constrastive Loss
 margin_contrast: 1.0 # Distance between positive and negative embeddings
