@@ -16,6 +16,15 @@ docs = df['narrative'].tolist()
 topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 
+#search for topics that are similar to an input search_term "loneliness"
+similar_topics, similarity = topic_model.find_topics("loneliness", top_n=20)
+print(topic_model.get_topic(similar_topics[0]))
+
+print("***********************************************************************************")
+
+similar_topics, similarity = topic_model.find_topics("lonely", top_n=20)
+print(topic_model.get_topic(similar_topics[0]))
+
 #Intertopic Distance Map
 distance_map = topic_model.visualize_topics()
 distance_map.show()
@@ -30,11 +39,10 @@ distr_map = topic_model.visualize_distribution(topic_distr[1])
 distr_map.show()
 
 # Calculate the topic distributions on a token-level
-topic_distr, topic_token_distr = topic_model.approximate_distribution(docs, calculate_tokens=True)
-
+#topic_distr, topic_token_distr = topic_model.approximate_distribution(docs, use_embedding_model=True)
 # Visualize the token-level distributions
-distr= topic_model.visualize_approximate_distribution(docs[1], topic_token_distr[1])
-print(distr)
+#distr = topic_model.visualize_approximate_distribution(docs[1], topic_token_distr[1])
+#distr.show()
 
 
 #hierchal topics
