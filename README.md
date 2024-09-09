@@ -2,7 +2,7 @@
 
 ## PsychSPT: Psychiatric Supportive Pretrained Transformer
 
-<img src="./draw/pyschspt.drawio.png" width="700">
+<img src="./draw/pyschspt.drawio.svg" width="700">
 
 This is the code of the <a href="https://arxiv.org/abs/2201.12086">PsychSPT paper</a>.
 To install the dependencies, run:
