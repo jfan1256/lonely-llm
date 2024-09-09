@@ -1,19 +1,25 @@
 # Towards Explainable and State-of-the-Art AI for Mental Health Research: Scalable Methods in Large Language Models with Strategic Layer Freezing,Document-Level Multi-Loss and Multi-Task Learning, and Diagnostic Reasoning
 
-_❛❛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In response to the escalating mental health crisis, this paper introduces significant 
-advancements in natural language &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;processing for mental health classification. We present PsychSPT:
-Psychiatric Supportive Pretrained Transformer, a &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;novel pre-trained transformer model, and the
-Loneliness Detection (LD) dataset—pioneering tools tailored for mental &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;health diagnostics. Our
-research shows that document-level embeddings outperform sentence-level ones, providing a 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contextually richer feature space for classification. We enhance performance through a novel layer
-freezing technique, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;which fine-tunes the transformer and classifier simultaneously, outpacing
-traditional methods. Additionally, our multi-task &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and multi-loss learning framework, integrating
-Focal, Tversky, Dice, and Contrastive Losses with sentiment analysis, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;significantly elevates
-classification accuracy. We also introduce an efficient encoder-decoder training framework that
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;maintains high accuracy and detailed explanations with only 276.2 million parameters and less
-than 1GB of &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;computational requirements—far less than the typical 5GB+. Finally, our proposed
-three-step evaluation framework &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rigorously assesses AI reasoning in mental health diagnostics,
-enhancing the consistency and reliability of AI-generated &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assessments.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❜❜_
+❛❛
+<div style="text-align: justify; justify-content: center; align-items: center; height: 15rem">
+<p style="margin-left: 2rem; margin-right: 3rem;">
+    In response to the escalating mental health crisis, this paper introduces significant 
+    advancements in natural language processing for mental health classification. We present PsychSPT:
+    Psychiatric Supportive Pretrained Transformer, a novel pre-trained transformer model, and the
+    Loneliness Detection (LD) dataset—pioneering tools tailored for mental health diagnostics. Our
+    research shows that document-level embeddings outperform sentence-level ones, providing a 
+    contextually richer feature space for classification. We enhance performance through a novel layer
+    freezing technique, which fine-tunes the transformer and classifier simultaneously, outpacing
+    traditional methods. Additionally, our multi-task and multi-loss learning framework, integrating
+    Focal, Tversky, Dice, and Contrastive Losses with sentiment analysis, significantly elevates
+    classification accuracy. We also introduce an efficient encoder-decoder training framework that
+    maintains high accuracy and detailed explanations with only 276.2 million parameters and less
+    than 1GB of computational requirements—far less than the typical 5GB+. Finally, our proposed
+    three-step evaluation framework rigorously assesses AI reasoning in mental health diagnostics,
+    enhancing the consistency and reliability of AI-generated assessments.
+</p>
+</div>
+<p style="margin-left: 41rem;">❜❜</p>
 
 ## PsychSPT: Psychiatric Supportive Pretrained Transformer
 
