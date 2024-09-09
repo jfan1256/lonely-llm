@@ -1,4 +1,4 @@
-# Towards Explainable and State-of-the-Art AI for Mental Health Research: Scalable Methods in Large Language Models with Strategic Layer Freezing,Document-Level Multi-Loss and Multi-Task Learning, and Diagnostic Reasoning
+## Towards Explainable and State-of-the-Art AI for Mental Health Research: Scalable Methods in Large Language Models with Strategic Layer Freezing,Document-Level Multi-Loss and Multi-Task Learning, and Diagnostic Reasoning
 
  _In response to the escalating mental health crisis, this paper introduces significant 
  advancements in natural language processing for mental health classification. We present PsychSPT:
