@@ -1,4 +1,19 @@
 # Towards Explainable and State-of-the-Art AI for Mental Health Research: Scalable Methods in Large Language Models with Strategic Layer Freezing,Document-Level Multi-Loss and Multi-Task Learning, and Diagnostic Reasoning
+**Abstract**
+<pre>In response to the escalating mental health crisis, this paper introduces significant 
+advancements in natural language processing for mental health classification. We present PsychSPT:
+Psychiatric Supportive Pretrained Transformer, a novel pre-trained transformer model, and the
+Loneliness Detection (LD) dataset—pioneering tools tailored for mental health diagnostics. Our
+research shows that document-level embeddings outperform sentence-level ones, providing a 
+contextually richer feature space for classification. We enhance performance through a novel layer
+freezing technique, which fine-tunes the transformer and classifier simultaneously, outpacing
+traditional methods. Additionally, our multi-task and multi-loss learning framework, integrating
+Focal, Tversky, Dice, and Contrastive Losses with sentiment analysis, significantly elevates
+classification accuracy. We also introduce an efficient encoder-decoder training framework that
+maintains high accuracy and detailed explanations with only 276.2 million parameters and less
+than 1GB of computational requirements—far less than the typical 5GB+. Finally, our proposed
+three-step evaluation framework rigorously assesses AI reasoning in mental health diagnostics,
+enhancing the consistency and reliability of AI-generated assessments.</pre>
 
 ## PsychSPT: Psychiatric Supportive Pretrained Transformer
 
