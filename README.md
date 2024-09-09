@@ -40,11 +40,11 @@ Dreaddit | <a href="https://drive.google.com/file/d/1i7UtIbovIZYAZ-xeGy9jBXyVca7
 ## How to Train PsychSPT (Analogous to Finetune):
 1. Choose Dreaddit or Loneliness Detection to train on. Data is under ./data/.
 2. Adjust parameters in psychspt.yaml under ./configs/train/. Here are a description of the important parameters and their functionality:
-   1. **_encoder_layer_train_**: Options are "all", "last", or "none". This determines which layers to train for the text encoder.
-   2. **_decoder_layer_train_**: Options are "all", "last", or "none". This determines which layers to train for the text decoder.
-   3. **_decoder_only_**: Options are "yes" or "no". This determines whether to train only the text decoder or not.
-   4. **_embed_type_**: Options are "document" or "sentence". This determines whether to encode the entire post or by sentences per post and aggregate by mean.
-   4. **_loss_**: Options are "loss_ce", "loss_focal", "loss_dice", "loss_tversky", "loss_constrast", "loss_reason", "loss_angular", "loss_perplex", "loss_center", and "loss_embed_match". Comment a loss to disable it for training. If "loss_reason", "loss_perplex", and "loss_embed_match" are commented, the text decoder will not be trained and only the classifier.
+   1. **encoder_layer_train** **(Options are "all", "last", or "none"):** This determines which layers to train for the text encoder.
+   2. **decoder_layer_train** **(Options are "all", "last", or "none"):** This determines which layers to train for the text decoder.
+   3. **decoder_only** **(Options are "yes" or "no"):** This determines whether to train only the text decoder or not.
+   4. **embed_type** **(Options are "document" or "sentence"):**. This determines whether to encode the entire post or by sentences per post and aggregate by mean.
+   4. **loss** **(Options are "loss_ce", "loss_focal", "loss_dice", "loss_tversky", "loss_constrast", "loss_reason", "loss_angular", "loss_perplex", "loss_center", and "loss_embed_match"):** Comment a loss to disable it for training. If "loss_reason", "loss_perplex", and "loss_embed_match" are commented, the text decoder will not be trained and only the classifier.
 2. To train PsychSPT using 1 GPU, run:
 <pre>python ./exec_train/train.py</pre> 
 3. To evaluate PsychSPT classification, run:
