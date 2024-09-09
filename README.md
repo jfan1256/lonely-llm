@@ -1,6 +1,6 @@
 # Towards Explainable and State-of-the-Art AI for Mental Health Research: Scalable Methods in Large Language Models with Strategic Layer Freezing,Document-Level Multi-Loss and Multi-Task Learning, and Diagnostic Reasoning
 
-## PyshcSPT: Pyschiatric Supportive Pretrained Transformer
+## PyschSPT: Pyschiatric Supportive Pretrained Transformer
 
 [//]: # (<img src="BLIP.gif" width="700">)
 
@@ -9,7 +9,7 @@ To install the dependencies, run:
 <pre>pip install -r requirements.txt
 pip install -e .</pre> 
 
-### Table of Content:
+## Table of Content:
 - [x] Pre-trained Checkpoints
 - [x] Train Checkpoints (Analogous to Finetune)
 - [x] How to Pretrain PyschSPT
@@ -19,7 +19,7 @@ pip install -e .</pre>
 - [x] Benchmark Machine Learning Experiments
 - [x] Citation
 
-### Pre-trained Checkpoint:
+## Pre-trained Checkpoint:
 Num. Pre-train Posts | PyschSPT |
 --- |:---:|
 4M | <a href="https://drive.google.com/file/d/1WqB8Yo5VikIpEgV1h9FDugd64Tfo2oPb/view?usp=sharing">Download</a> | - | -
@@ -30,14 +30,14 @@ Dataset |                                                     PyshcSPT + Classif
 Loneliness Detection | <a href="https://drive.google.com/file/d/1kEdIfNCmFzkL-Hu7CcsI6pZ7i1eTxStY/view?usp=sharing">Download</a>   | <a href="https://drive.google.com/file/d/1BW-8OlXjpwPkkljfBlW_KpGWdGOgJoBL/view?usp=sharing">Download</a>
 Dreaddit | <a href="https://drive.google.com/file/d/1i7UtIbovIZYAZ-xeGy9jBXyVca7-qtJ7/view?usp=sharing">Download</a> | <a href="https://drive.google.com/file/d/1wXRh2_p6YVEqfUIlhkjK2T42s7XPKCoc/view?usp=sharing">Download</a>
 
-### How to Pretrain PyschSPT:
+## How to Pretrain PyschSPT:
 1. Crawl 4M posts from Reddit (list of subreddits in the paper). Process the subreddits using prep_corpus_doc.py under ./exec_prep/
 2. Adjust parameters in pyschspt.yaml under ./configs/pretrain/. The current configs are what I used.
 3. Adjust parameters in bert_base.json under ./configs/model/. The current configs are what I used and what Bert-Base-Uncased was train with.
 4. To pretrain PsychSPT using 4 GPUs, run:
 <pre>python -m torch.distributed.run --nproc_per_node=4 ./exec_pretrain/pretrain.py</pre>
 
-### How to Train PyschSPT (Analogous to Finetune):
+## How to Train PyschSPT (Analogous to Finetune):
 1. Choose Dreaddit or Loneliness Detection to train on. Data is under ./data/.
 2. Adjust parameters in pyschspt.yaml under ./configs/train/. Here are a description of the important parameters and their functionality:
    1. **_encoder_layer_train_**: Options are "all", "last", or "none". This determines which layers to train for the text encoder.
@@ -52,7 +52,7 @@ Dreaddit | <a href="https://drive.google.com/file/d/1i7UtIbovIZYAZ-xeGy9jBXyVca7
 4. To generate PsychSPT diagnostic reasoning, run:
 <pre>python ./exec_eval/eval_generate.py </pre> 
 
-### Example of PyschSPT Diagnostic Reasoning:
+## Example of PyschSPT Diagnostic Reasoning:
 **Dreaddit Post:** <pre>Little over 3 hours ago, my dad had attacked me. I’m not sure who to go to 
 for advice, hoping someone can share any here. Thank you. Here’s the full story: 
 Preceding physical contact, me and my dad were having a verbal argument. </pre> 
@@ -65,13 +65,13 @@ element of self-blame in the description, it does not conveyx overwhelming
 anxiety or helplessness typically associated with high levels of stress. instead, 
 the tone remains relatively composed and factual throughout. </pre> 
 
-### Novel Diagnostic Reasoning Evaluation Framework
+## Novel Diagnostic Reasoning Evaluation Framework
 To follow our Cosine Similarity and Jaccard Similarity evaluation steps introduced in our paper's 
 novel diagnostic reasoning evaluation framework, run:
 <pre>python ./exec_eval_reason/eval_reason_cos_sim.py
 python ./exec_eval_reason/eval_reason_jaccard.py</pre> 
 
-### Benchmark Machine Learning Experiments
+## Benchmark Machine Learning Experiments
 To follow our benchmark machine learning experiments for our Loneliness Detection dataset, run these files in order:
 <pre>
 python ./exec_benchmark/benchmark_cls_token_emb.py
@@ -81,7 +81,7 @@ python ./exec_benchmark/benchmark_xgb.py
 python ./exec_benchmark/benchmark_cnn.py
 </pre> 
 
-### Citation
+## Citation
 If you find this code to be useful for your research, please consider citing.
 <pre>
 @inproceedings{fan2024pyschspt,
