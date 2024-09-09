@@ -10,14 +10,14 @@ To install the dependencies, run:
 pip install -e .</pre> 
 
 ## Table of Content:
-- [x] Pre-trained Checkpoints
-- [x] Train Checkpoints (Analogous to Finetune)
-- [x] How to Pretrain PsychSPT
-- [x] How to Train PsychSPT (Analogous to Finetune)
-- [x] Example of PsychSPT Diagnostic Reasoning
-- [x] Novel Diagnostic Reasoning Evaluation Framework
-- [x] Benchmark Machine Learning Experiments
-- [x] Citation
+- ✅ Pre-trained Checkpoints
+- ✅ Train Checkpoints (Analogous to Finetune)
+- ✅ How to Pretrain PsychSPT
+- ✅ How to Train PsychSPT (Analogous to Finetune)
+- ✅ Example of PsychSPT Diagnostic Reasoning
+- ✅ Novel Diagnostic Reasoning Evaluation Framework
+- ✅ Benchmark Machine Learning Experiments
+- ✅ Citation
 
 ## Pre-trained Checkpoint:
 Num. Pre-train Posts |                                                 PsychSPT                                                  |
