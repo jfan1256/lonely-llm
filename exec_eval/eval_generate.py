@@ -13,17 +13,17 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 from utils.print import print_header
 from class_models.model_utils import set_seed
 from utils.system import get_configs
-from class_models.bert_lonely import init_bert_lonely
+from class_models.pyschspt import init_pyschspt
 from class_dataloader.dataloader import Train
 
 if __name__ == '__main__':
     # Set seed
     set_seed(20050531)
 
-    # Initialize BertReddit
-    print_header("Initialize BertLonely")
-    configs = yaml.load(open(get_configs() / 'train' / 'bert_lonely.yaml', 'r'), Loader=yaml.Loader)
-    bert_lonely = init_bert_lonely(pretrained=configs['eval_checkpoint'], configs=configs)
+    # Initialize PyschSPT
+    print_header("Initialize PyschSPT")
+    configs = yaml.load(open(get_configs() / 'train' / 'pyschspt.yaml', 'r'), Loader=yaml.Loader)
+    bert_lonely = init_pyschspt(pretrained=configs['eval_checkpoint'], configs=configs)
     bert_lonely = bert_lonely.to(device=configs['eval_device'])
     bert_lonely.eval()
 

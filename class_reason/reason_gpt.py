@@ -34,12 +34,6 @@ class ReasonGPT:
                     "content": [
                         {
                             "type": "text",
-                            # "text": f"Role: {self.prompt.capitalize()} Psychiatrist\n"
-	                        #         f"Description: The task involves assessing narratives that have been previously evaluated and labeled by professional {self.prompt} psychiatrists. Each narrative is classified with a binary label: 1 indicates the narrative was authored by an individual experiencing {self.prompt}, and 0 indicates the opposite.\n"
-                            #         f"Requirement: Provide an explanation strictly based on the given label. Write the response entirely in lowercase, without referencing the label or classification process, and format it as a single paragraph.\n"
-                            #         f"Task: Review the narrative and the provided label. Analyze and explain the classification by discussing context, specific examples from the narrative, and relevant psychological insights. Identify which aspects of the narrative are typical indicators of {self.prompt} or non-{self.prompt} and justify their relevance.\n"
-                            #         f"Narrative: {narrative}\n"
-                            #         f"Label: {label}"
                             "text": f"{self.prompt}"
                                     f"Narrative: {narrative}\n"
                                     f"Label: {label}"

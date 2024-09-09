@@ -15,7 +15,7 @@ from utils.print import print_header
 from utils.system import get_configs
 from class_models.model_utils import set_seed
 from class_dataloader.dataloader import Train
-from class_models.bert_lonely import init_bert_lonely
+from class_models.pyschspt import init_pyschspt
 
 # Read evaluated checkpoints
 def read_evaluated_checkpoints(log_path):
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     set_seed(20050531)
 
     # Get configs
-    configs = yaml.load(open(get_configs() / 'train' / 'bert_lonely.yaml', 'r'), Loader=yaml.Loader)
+    configs = yaml.load(open(get_configs() / 'train' / 'pyschspt.yaml', 'r'), Loader=yaml.Loader)
 
     # Load in test data
     print_header("Initialize Dataloader")
@@ -77,7 +77,7 @@ if __name__ == '__main__':
             print_header(f"Evaluating {file}")
             current_configs = configs.copy()
             current_configs['eval_checkpoint'] = checkpoint_path
-            model = init_bert_lonely(pretrained=current_configs['eval_checkpoint'], configs=current_configs)
+            model = init_pyschspt(pretrained=current_configs['eval_checkpoint'], configs=current_configs)
             model = model.to(current_configs['eval_device'])
             model.eval()
 

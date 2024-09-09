@@ -270,7 +270,7 @@ if __name__ == "__main__":
     cudnn.benchmark = True
 
     # Get configs
-    configs = yaml.load(open(get_configs() / 'pretrain' / 'bert_lonely.yaml', 'r'), Loader=yaml.Loader)
+    configs = yaml.load(open(get_configs() / 'pretrain' / 'pyschspt.yaml', 'r'), Loader=yaml.Loader)
 
     # Parse configs
     parser = argparse.ArgumentParser()

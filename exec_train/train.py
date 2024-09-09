@@ -24,7 +24,7 @@ from utils.system import get_configs
 from class_models.model_utils import set_seed
 from class_dataloader.dataloader import Train
 from class_models.plot import plot_diagnostics
-from class_models.bert_lonely import init_bert_lonely
+from class_models.pyschspt import init_pyschspt
 from class_dataloader.utils import create_dataloader, create_sampler
 from class_models.train_utils import MetricLogger, SmoothedValue, cosine_lr_schedule
 from class_models.train_utils import init_distributed_mode, get_rank, get_world_size, is_main_process, freeze_param
@@ -120,7 +120,7 @@ def main(args, configs):
 
     # Initialize model
     print_header("Initialize Model")
-    bert_reddit_model = init_bert_lonely(pretrained=None, configs=configs)
+    bert_reddit_model = init_pyschspt(pretrained=None, configs=configs)
     model = bert_reddit_model.to(device=configs['train_device'])
 
     # Initialize dataloader
@@ -291,7 +291,7 @@ if __name__ == '__main__':
     cudnn.benchmark = True
 
     # Get configs
-    configs = yaml.load(open(get_configs() / 'train' / 'bert_lonely.yaml', 'r'), Loader=yaml.Loader)
+    configs = yaml.load(open(get_configs() / 'train' / 'pyschspt.yaml', 'r'), Loader=yaml.Loader)
 
     # Parse configs
     parser = argparse.ArgumentParser()
