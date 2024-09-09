@@ -48,7 +48,7 @@ Dreaddit | <a href="https://drive.google.com/file/d/1i7UtIbovIZYAZ-xeGy9jBXyVca7
 2. To train PsychSPT using 1 GPU, run:
 <pre>python ./exec_train/train.py</pre> 
 3. To evaluate PsychSPT classification, run:
-<pre>python ./exec_eval/eval_nocaps.py </pre> 
+<pre>python ./exec_eval/eval_metric.py </pre> 
 4. To generate PsychSPT diagnostic reasoning, run:
 <pre>python ./exec_eval/eval_generate.py </pre> 
 
