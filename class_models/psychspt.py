@@ -345,7 +345,7 @@ class BertLonely(nn.Module):
         return reasons
 
 # Initialize PyschSPT model
-def init_pyschspt(pretrained, **kwargs):
+def init_psychspt(pretrained, **kwargs):
     model = BertLonely(**kwargs)
     if pretrained:
         model, msg = load_checkpoint(model, pretrained)

@@ -1,10 +1,10 @@
 # Towards Explainable and State-of-the-Art AI for Mental Health Research: Scalable Methods in Large Language Models with Strategic Layer Freezing,Document-Level Multi-Loss and Multi-Task Learning, and Diagnostic Reasoning
 
-## PyschSPT: Pyschiatric Supportive Pretrained Transformer
+## PsychSPT: Psychiatric Supportive Pretrained Transformer
 
 [//]: # (<img src="BLIP.gif" width="700">)
 
-This is the code of the <a href="https://arxiv.org/abs/2201.12086">PyschSPT paper</a>.
+This is the code of the <a href="https://arxiv.org/abs/2201.12086">PsychSPT paper</a>.
 To install the dependencies, run:
 <pre>pip install -r requirements.txt
 pip install -e .</pre> 
@@ -12,16 +12,16 @@ pip install -e .</pre>
 ## Table of Content:
 - [x] Pre-trained Checkpoints
 - [x] Train Checkpoints (Analogous to Finetune)
-- [x] How to Pretrain PyschSPT
-- [x] How to Train PyschSPT (Analogous to Finetune)
-- [x] Example of PyschSPT Diagnostic Reasoning
+- [x] How to Pretrain PsychSPT
+- [x] How to Train PsychSPT (Analogous to Finetune)
+- [x] Example of PsychSPT Diagnostic Reasoning
 - [x] Novel Diagnostic Reasoning Evaluation Framework
 - [x] Benchmark Machine Learning Experiments
 - [x] Citation
 
 ## Pre-trained Checkpoint:
-Num. Pre-train Posts | PyschSPT |
---- |:---:|
+Num. Pre-train Posts |                                                 PsychSPT                                                  |
+--- |:---------------------------------------------------------------------------------------------------------:|
 4M | <a href="https://drive.google.com/file/d/1WqB8Yo5VikIpEgV1h9FDugd64Tfo2oPb/view?usp=sharing">Download</a> | - | -
 
 ### Train Checkpoints (Analogous to Finetune):
@@ -30,16 +30,16 @@ Dataset |                                                     PyshcSPT + Classif
 Loneliness Detection | <a href="https://drive.google.com/file/d/1kEdIfNCmFzkL-Hu7CcsI6pZ7i1eTxStY/view?usp=sharing">Download</a>   | <a href="https://drive.google.com/file/d/1BW-8OlXjpwPkkljfBlW_KpGWdGOgJoBL/view?usp=sharing">Download</a>
 Dreaddit | <a href="https://drive.google.com/file/d/1i7UtIbovIZYAZ-xeGy9jBXyVca7-qtJ7/view?usp=sharing">Download</a> | <a href="https://drive.google.com/file/d/1wXRh2_p6YVEqfUIlhkjK2T42s7XPKCoc/view?usp=sharing">Download</a>
 
-## How to Pretrain PyschSPT:
+## How to Pretrain PsychSPT:
 1. Crawl 4M posts from Reddit (list of subreddits in the paper). Process the subreddits using prep_corpus_doc.py under ./exec_prep/
-2. Adjust parameters in pyschspt.yaml under ./configs/pretrain/. The current configs are what I used.
+2. Adjust parameters in psychspt.yaml under ./configs/pretrain/. The current configs are what I used.
 3. Adjust parameters in bert_base.json under ./configs/model/. The current configs are what I used and what Bert-Base-Uncased was train with.
 4. To pretrain PsychSPT using 4 GPUs, run:
 <pre>python -m torch.distributed.run --nproc_per_node=4 ./exec_pretrain/pretrain.py</pre>
 
-## How to Train PyschSPT (Analogous to Finetune):
+## How to Train PsychSPT (Analogous to Finetune):
 1. Choose Dreaddit or Loneliness Detection to train on. Data is under ./data/.
-2. Adjust parameters in pyschspt.yaml under ./configs/train/. Here are a description of the important parameters and their functionality:
+2. Adjust parameters in psychspt.yaml under ./configs/train/. Here are a description of the important parameters and their functionality:
    1. **_encoder_layer_train_**: Options are "all", "last", or "none". This determines which layers to train for the text encoder.
    2. **_decoder_layer_train_**: Options are "all", "last", or "none". This determines which layers to train for the text decoder.
    3. **_decoder_only_**: Options are "yes" or "no". This determines whether to train only the text decoder or not.
@@ -52,7 +52,7 @@ Dreaddit | <a href="https://drive.google.com/file/d/1i7UtIbovIZYAZ-xeGy9jBXyVca7
 4. To generate PsychSPT diagnostic reasoning, run:
 <pre>python ./exec_eval/eval_generate.py </pre> 
 
-## Example of PyschSPT Diagnostic Reasoning:
+## Example of PsychSPT Diagnostic Reasoning:
 **Dreaddit Post:** <pre>Little over 3 hours ago, my dad had attacked me. I’m not sure who to go to 
 for advice, hoping someone can share any here. Thank you. Here’s the full story: 
 Preceding physical contact, me and my dad were having a verbal argument. </pre> 
@@ -84,7 +84,7 @@ python ./exec_benchmark/benchmark_cnn.py
 ## Citation
 If you find this code to be useful for your research, please consider citing.
 <pre>
-@inproceedings{fan2024pyschspt,
+@inproceedings{fan2024psychspt,
       title={Towards Explainable and State-of-the-Art AI for Mental Health Research: Scalable Methods in Large Language Models with Strategic Layer Freezing,Document-Level Multi-Loss and Multi-Task Learning, and Diagnostic Reasoning},
       author={Jonathan Fan, Winston Fan, Ling Tong, Jiyuan Li, and Weiguo Fan},
       year={2024},
