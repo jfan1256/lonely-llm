@@ -1,12 +1,14 @@
+ipywidgets==8.0.1
+jupyterlab==3.4.5
+jupyterlab-widgets==3.0.2
 timm
-transformers
+numpy
+numba
+pandas
 fairscale
-opencv-python
-jupyterlab
 tensorflow
 matplotlib
-numpy
-pandas
-numba
+transformers
+opencv-python
 
 # conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
