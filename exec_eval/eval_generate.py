@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     # Initialize PyschSPT
     print_header("Initialize PyschSPT")
-    configs = yaml.load(open(get_configs() / 'train' / 'pyschspt.yaml', 'r'), Loader=yaml.Loader)
+    configs = yaml.load(open(get_configs() / 'train' / 'psychspt.yaml', 'r'), Loader=yaml.Loader)
     bert_lonely = init_psychspt(pretrained=configs['eval_checkpoint'], configs=configs)
     bert_lonely = bert_lonely.to(device=configs['eval_device'])
     bert_lonely.eval()

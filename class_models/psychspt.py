@@ -10,7 +10,7 @@ from class_models.model_utils import load_checkpoint, tie_encoder_decoder_weight
 from class_models.loss import focal_loss, tversky_loss, dice_loss, center_loss, contrast_loss_encoder, large_margin_cosine_loss, contrast_loss_decoder, embed_match_loss, perplex_loss, ce_loss
 
 
-class BertLonely(nn.Module):
+class PsychSPT(nn.Module):
     def __init__(self,
                  configs,
                  ):
@@ -227,10 +227,10 @@ class BertLonely(nn.Module):
             # Add prompt to reason
             reason = [self.configs['prompt'] + item for item in reason]
 
-            # Tokenize and encode the reason
+            # Tokenize reason
             text_reason = self.tokenizer(reason, padding='max_length', truncation=True, return_tensors="pt").to(device)
 
-            # Prepare decoder input using prompt's last hidden state
+            # Prepare decoder input ids by adding BOS token to the start of each sequence
             decoder_input_ids = text_reason.input_ids.clone()
             bos_tokens = torch.full((decoder_input_ids.size(0), 1), self.tokenizer.bos_token_id, dtype=torch.long, device=device)
             decoder_input_ids = torch.cat([bos_tokens, decoder_input_ids[:, :-1]], dim=1)
@@ -346,7 +346,7 @@ class BertLonely(nn.Module):
 
 # Initialize PyschSPT model
 def init_psychspt(pretrained, **kwargs):
-    model = BertLonely(**kwargs)
+    model = PsychSPT(**kwargs)
     if pretrained:
         model, msg = load_checkpoint(model, pretrained)
         print("missing keys:")

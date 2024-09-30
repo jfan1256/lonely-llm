@@ -53,7 +53,7 @@ if __name__ == '__main__':
     set_seed(20050531)
 
     # Get configs
-    configs = yaml.load(open(get_configs() / 'train' / 'pyschspt.yaml', 'r'), Loader=yaml.Loader)
+    configs = yaml.load(open(get_configs() / 'train' / 'psychspt.yaml', 'r'), Loader=yaml.Loader)
 
     # Load in test data
     print_header("Initialize Dataloader")

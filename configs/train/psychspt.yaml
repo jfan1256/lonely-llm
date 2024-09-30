@@ -33,9 +33,10 @@
 #output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_no_all'
 #output_dir: '../paper_experiment/dreaddit/base_bert_mlp_no_last'
 #output_dir: '../paper_experiment/dreaddit/base_bert_mlp_all'
+output_dir: '../paper_experiment/dreaddit/corpus_bert_no_cross_all'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_all'
-output_dir: '../paper_experiment/dreaddit/corpus_bert_avg'
+#output_dir: '../paper_experiment/dreaddit/corpus_bert_avg'
 
 #******************************LONELINESS******************************
 #********MLP Comparison********
@@ -135,7 +136,7 @@ num_class: 2
 embed_type: 'document'
 
 # BERT Layer Train
-encoder_layer_train: 'last'
+encoder_layer_train: 'all'
 decoder_layer_train: 'last'
 
 # Train Decoder Only
@@ -148,12 +149,12 @@ bert_model_checkpoint: '../store_model/bert_corpus_checkpoint_30.pth'
 
 # Loss
 loss:
-  - loss_ce
+#  - loss_ce
   - loss_focal
   - loss_dice
   - loss_tversky
   - loss_contrast
-  - loss_reason
+#  - loss_reason
 #  - loss_angular
 #  - loss_center
 #  - loss_perplex
