@@ -137,8 +137,8 @@ class PsychSPT(nn.Module):
             text_embed = text_feat.last_hidden_state
 
             # Extract the [CLS] token's final layer features
-            enc_cls_output = text_embed.mean(dim=1)
-            # enc_cls_output = text_feat.last_hidden_state[:, 0]
+            # enc_cls_output = text_embed.mean(dim=1)
+            enc_cls_output = text_feat.last_hidden_state[:, 0]
 
         # Sentence embeddings
         elif self.configs['embed_type'] == 'sentence':

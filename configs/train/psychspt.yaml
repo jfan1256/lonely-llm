@@ -33,7 +33,8 @@
 #output_dir: '../paper_experiment/dreaddit/mental_bert_mlp_no_all'
 #output_dir: '../paper_experiment/dreaddit/base_bert_mlp_no_last'
 #output_dir: '../paper_experiment/dreaddit/base_bert_mlp_all'
-output_dir: '../paper_experiment/dreaddit/corpus_bert_no_cross_all'
+#output_dir: '../paper_experiment/dreaddit/corpus_bert_no_cross_all'
+output_dir: '../paper_experiment/dreaddit/corpus_cls_test_best_review'
 #********All Layer Comparison********
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_no_decoder_all'
 #output_dir: '../paper_experiment/dreaddit/corpus_bert_avg'
@@ -136,7 +137,7 @@ num_class: 2
 embed_type: 'document'
 
 # BERT Layer Train
-encoder_layer_train: 'all'
+encoder_layer_train: 'last'
 decoder_layer_train: 'last'
 
 # Train Decoder Only
